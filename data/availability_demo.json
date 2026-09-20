@@ -1,0 +1,360 @@
+{
+  "_meta": {
+    "title": "Atlas — Simulated Resource Availability (PROTOTYPE)",
+    "disclaimer": "THIS DATA IS NOT REAL. It is realistic simulated availability created to demonstrate how Atlas could surface near-real-time capacity. Atlas does not currently receive live feeds from shelters, HMIS systems, food pantries, healthcare providers, or coordinated entry. Do not use these numbers to make decisions. Always contact a provider directly to confirm current availability.",
+    "schema_version": 1,
+    "field_notes": {
+      "updated_minutes_ago": "Demo-only. Anchored to page load time so freshness ('Fresh' < 1h, 'Aging' < 6h, 'Stale' otherwise) behaves naturally in a live demo. A real adapter supplies an ISO 'last_updated' instead.",
+      "update_source": "One of: provider, hmis, coordinated_entry, clarity, 211, findhelp, unite_us, open_data, demo_simulation"
+    }
+  },
+  "records": [
+    {
+      "facility_id": "rhy:9457d87593",
+      "availability": {
+        "total_capacity": 40,
+        "available_capacity": 7,
+        "accepting_clients": true,
+        "open_now": true,
+        "updated_minutes_ago": 12,
+        "update_source": "provider",
+        "message": "Intake open until 9:00 PM. Families prioritized."
+      }
+    },
+    {
+      "facility_id": "suffolk:1875d536ce",
+      "availability": {
+        "total_capacity": 74,
+        "available_capacity": 0,
+        "accepting_clients": false,
+        "open_now": true,
+        "updated_minutes_ago": 22,
+        "update_source": "provider",
+        "message": "At capacity tonight. Referrals to Suffolk DSS after-hours line."
+      }
+    },
+    {
+      "facility_id": "suffolk:14e44c6f05",
+      "availability": {
+        "total_capacity": 30,
+        "available_capacity": 3,
+        "accepting_clients": true,
+        "open_now": true,
+        "updated_minutes_ago": 128,
+        "update_source": "hmis"
+      }
+    },
+    {
+      "facility_id": "suffolk:3df3e7c517",
+      "availability": {
+        "total_capacity": 120,
+        "available_capacity": 34,
+        "accepting_clients": true,
+        "open_now": true,
+        "updated_minutes_ago": 44,
+        "update_source": "hmis"
+      }
+    },
+    {
+      "facility_id": "suffolk:77fd29c219",
+      "availability": {
+        "accepting_clients": true,
+        "open_now": true,
+        "next_service_time": "Walk-in hours 8:00 AM – 8:00 PM",
+        "updated_minutes_ago": 18,
+        "update_source": "provider",
+        "message": "Day center open. Showers, mail, case management, coordinated entry screening."
+      }
+    },
+    {
+      "facility_id": "suffolk:c74e8ec47e",
+      "availability": {
+        "accepting_clients": true,
+        "open_now": true,
+        "wait_minutes": 40,
+        "updated_minutes_ago": 55,
+        "update_source": "open_data"
+      }
+    },
+    {
+      "facility_id": "suffolk:042bf8abb6",
+      "availability": {
+        "accepting_clients": true,
+        "open_now": true,
+        "updated_minutes_ago": 1490,
+        "update_source": "demo_simulation"
+      }
+    },
+    {
+      "facility_id": "suffolk:e15704f1e0",
+      "availability": {
+        "open_now": false,
+        "accepting_clients": false,
+        "next_service_time": "Reopens tomorrow 9:00 AM",
+        "updated_minutes_ago": 95,
+        "update_source": "open_data"
+      }
+    },
+    {
+      "facility_id": "suffolk:815e093e6f",
+      "availability": {
+        "accepting_clients": true,
+        "open_now": true,
+        "wait_minutes": 65,
+        "updated_minutes_ago": 340,
+        "update_source": "open_data"
+      }
+    },
+
+    {
+      "facility_id": "osm:n10805676402",
+      "availability": {
+        "open_now": true,
+        "meals_available": 34,
+        "next_service_time": "Today 4:00 PM",
+        "accepting_clients": true,
+        "updated_minutes_ago": 25,
+        "update_source": "provider",
+        "message": "Fresh produce distribution at 4 PM. Bring a bag if you can."
+      }
+    },
+    {
+      "facility_id": "licares:fdab5d5e12",
+      "availability": {
+        "open_now": true,
+        "meals_available": 120,
+        "next_service_time": "Today until 3:00 PM",
+        "accepting_clients": true,
+        "updated_minutes_ago": 40,
+        "update_source": "provider"
+      }
+    },
+    {
+      "facility_id": "licares:fa27b1820c",
+      "availability": {
+        "open_now": true,
+        "meals_available": 8,
+        "next_service_time": "Restock tomorrow 10:00 AM",
+        "accepting_clients": true,
+        "updated_minutes_ago": 165,
+        "update_source": "provider",
+        "message": "Running low on pantry boxes today."
+      }
+    },
+    {
+      "facility_id": "licares:a45bd47ea1",
+      "availability": {
+        "open_now": true,
+        "meals_available": 60,
+        "next_service_time": "Today 2:00 PM",
+        "accepting_clients": true,
+        "updated_minutes_ago": 12,
+        "update_source": "211"
+      }
+    },
+    {
+      "facility_id": "iharvest:044c7a79f4",
+      "availability": {
+        "open_now": true,
+        "meals_available": 0,
+        "next_service_time": "Thursday 5:00 PM",
+        "accepting_clients": false,
+        "updated_minutes_ago": 300,
+        "update_source": "demo_simulation",
+        "message": "Out of boxes for today's distribution."
+      }
+    },
+    {
+      "facility_id": "iharvest:3c32d4a11d",
+      "availability": {
+        "open_now": true,
+        "meals_available": 45,
+        "next_service_time": "By appointment",
+        "accepting_clients": true,
+        "updated_minutes_ago": 58,
+        "update_source": "findhelp"
+      }
+    },
+    {
+      "facility_id": "iharvest:70496bb9e8",
+      "availability": {
+        "open_now": false,
+        "next_service_time": "Saturday 9:00 AM",
+        "updated_minutes_ago": 1180,
+        "update_source": "demo_simulation"
+      }
+    },
+
+    {
+      "facility_id": "suffolk:f944cf642a",
+      "availability": {
+        "open_now": true,
+        "walk_ins": true,
+        "wait_minutes": 35,
+        "accepting_clients": true,
+        "updated_minutes_ago": 10,
+        "update_source": "provider",
+        "message": "Accepting walk-ins for adult medical and behavioral health."
+      }
+    },
+    {
+      "facility_id": "suffolk:4ad485ba76",
+      "availability": {
+        "open_now": true,
+        "walk_ins": true,
+        "wait_minutes": 75,
+        "accepting_clients": true,
+        "updated_minutes_ago": 15,
+        "update_source": "provider"
+      }
+    },
+    {
+      "facility_id": "suffolk:cbf02001c5",
+      "availability": {
+        "open_now": true,
+        "walk_ins": false,
+        "accepting_clients": true,
+        "next_service_time": "Next open walk-in slot: tomorrow",
+        "updated_minutes_ago": 48,
+        "update_source": "provider",
+        "message": "Appointments only today — call to schedule."
+      }
+    },
+    {
+      "facility_id": "suffolk:b8158dd44b",
+      "availability": {
+        "open_now": true,
+        "walk_ins": true,
+        "wait_minutes": 20,
+        "accepting_clients": true,
+        "updated_minutes_ago": 250,
+        "update_source": "clarity"
+      }
+    },
+    {
+      "facility_id": "suffolk:6ed41ca948",
+      "availability": {
+        "accepting_clients": true,
+        "updated_minutes_ago": 2760,
+        "update_source": "demo_simulation"
+      }
+    },
+
+    {
+      "facility_id": "suffolk:d5cf5795c2",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "walk_ins": true,
+        "wait_minutes": 15,
+        "updated_minutes_ago": 8,
+        "update_source": "provider",
+        "message": "24/7 walk-in crisis stabilization. No appointment needed."
+      }
+    },
+    {
+      "facility_id": "suffolk:705ee8ffeb",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "wait_minutes": 25,
+        "updated_minutes_ago": 52,
+        "update_source": "unite_us"
+      }
+    },
+    {
+      "facility_id": "iharvest:c6d2cdf5f9",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": false,
+        "updated_minutes_ago": 190,
+        "update_source": "provider",
+        "message": "Outpatient program full — waitlist roughly 2 weeks. Detox referrals still accepted."
+      }
+    },
+
+    {
+      "facility_id": "suffolk:84cbe3e6ef",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "next_service_time": "Coordinated entry assessments Mon–Fri, 9:00 AM – 4:00 PM",
+        "updated_minutes_ago": 35,
+        "update_source": "coordinated_entry",
+        "message": "Single point of entry for the Long Island CoC homeless system."
+      }
+    },
+    {
+      "facility_id": "iharvest:0970bf4bdb",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "updated_minutes_ago": 120,
+        "update_source": "provider"
+      }
+    },
+    {
+      "facility_id": "suffolk:e7402d443d",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "updated_minutes_ago": 360,
+        "update_source": "provider",
+        "message": "Supportive-housing waitlist open; placements limited this quarter."
+      }
+    },
+
+    {
+      "facility_id": "suffolk:5a9a44ec3a",
+      "availability": {
+        "open_now": false,
+        "next_service_time": "Overnight hospitality resumes November",
+        "updated_minutes_ago": 1800,
+        "update_source": "demo_simulation",
+        "message": "Seasonal program (Nov–Apr). Currently closed for the season."
+      }
+    },
+    {
+      "facility_id": "suffolk:729d547715",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "updated_minutes_ago": 45,
+        "update_source": "provider",
+        "message": "Recovery community center open. Peer support and Narcan available."
+      }
+    },
+
+    {
+      "facility_id": "suffolk:9c10d2ec3a",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "next_service_time": "Phone intake Mon–Fri 9:00 AM – 1:00 PM",
+        "updated_minutes_ago": 90,
+        "update_source": "provider",
+        "message": "Eviction defense and benefits appeals — callback within 2 business days."
+      }
+    },
+    {
+      "facility_id": "suffolk:0dd2763292",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "updated_minutes_ago": 240,
+        "update_source": "open_data"
+      }
+    },
+
+    {
+      "facility_id": "suffolk:fc048568e9",
+      "availability": {
+        "open_now": true,
+        "accepting_clients": true,
+        "wait_minutes": 30,
+        "updated_minutes_ago": 130,
+        "update_source": "open_data"
+      }
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "mode": "walk",
+  "permutations": 999,
+  "p_threshold": 0.05,
+  "primary_weights": "queen",
+  "global_moran": [
+    {
+      "variable": "need_score",
+      "weights": "queen",
+      "I": 0.2276,
+      "EI": -0.0015,
+      "z_sim": 10.123,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "need_score",
+      "weights": "knn5",
+      "I": 0.2335,
+      "EI": -0.0015,
+      "z_sim": 10.099,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "need_score",
+      "weights": "dist3mi",
+      "I": 0.1333,
+      "EI": -0.0015,
+      "z_sim": 8.2,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "access_score",
+      "weights": "queen",
+      "I": 0.1027,
+      "EI": -0.0015,
+      "z_sim": 5.029,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "access_score",
+      "weights": "knn5",
+      "I": 0.1058,
+      "EI": -0.0015,
+      "z_sim": 4.901,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "access_score",
+      "weights": "dist3mi",
+      "I": 0.0436,
+      "EI": -0.0015,
+      "z_sim": 3.153,
+      "p_sim": 0.011
+    },
+    {
+      "variable": "mismatch_index",
+      "weights": "queen",
+      "I": 0.1056,
+      "EI": -0.0015,
+      "z_sim": 4.781,
+      "p_sim": 0.002
+    },
+    {
+      "variable": "mismatch_index",
+      "weights": "knn5",
+      "I": 0.1106,
+      "EI": -0.0015,
+      "z_sim": 4.817,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "mismatch_index",
+      "weights": "dist3mi",
+      "I": 0.0519,
+      "EI": -0.0015,
+      "z_sim": 3.559,
+      "p_sim": 0.003
+    },
+    {
+      "variable": "rent_burden_rate",
+      "weights": "queen",
+      "I": 0.0487,
+      "EI": -0.0015,
+      "z_sim": 2.125,
+      "p_sim": 0.018
+    },
+    {
+      "variable": "rent_burden_rate",
+      "weights": "knn5",
+      "I": 0.0239,
+      "EI": -0.0015,
+      "z_sim": 1.144,
+      "p_sim": 0.133
+    },
+    {
+      "variable": "rent_burden_rate",
+      "weights": "dist3mi",
+      "I": 0.0422,
+      "EI": -0.0015,
+      "z_sim": 2.592,
+      "p_sim": 0.008
+    },
+    {
+      "variable": "poverty_rate",
+      "weights": "queen",
+      "I": 0.1909,
+      "EI": -0.0015,
+      "z_sim": 8.197,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "poverty_rate",
+      "weights": "knn5",
+      "I": 0.1969,
+      "EI": -0.0015,
+      "z_sim": 8.963,
+      "p_sim": 0.001
+    },
+    {
+      "variable": "poverty_rate",
+      "weights": "dist3mi",
+      "I": 0.1323,
+      "EI": -0.0015,
+      "z_sim": 7.859,
+      "p_sim": 0.001
+    }
+  ],
+  "robustness": [
+    {
+      "variable": "need_score",
+      "I_mean": 0.1981,
+      "I_std": 0.0459,
+      "p_max": 0.001,
+      "robust": true
+    },
+    {
+      "variable": "access_score",
+      "I_mean": 0.0841,
+      "I_std": 0.0286,
+      "p_max": 0.011,
+      "robust": false
+    },
+    {
+      "variable": "mismatch_index",
+      "I_mean": 0.0893,
+      "I_std": 0.0266,
+      "p_max": 0.003,
+      "robust": false
+    },
+    {
+      "variable": "rent_burden_rate",
+      "I_mean": 0.0383,
+      "I_std": 0.0105,
+      "p_max": 0.133,
+      "robust": false
+    },
+    {
+      "variable": "poverty_rate",
+      "I_mean": 0.1734,
+      "I_std": 0.0291,
+      "p_max": 0.001,
+      "robust": true
+    }
+  ],
+  "validation_gate": {
+    "bivariate_I": 0.029,
+    "p_sim": 0.077,
+    "interpretation": "I=+0.029, p=0.077 \u2014 not significant; no clear spatial relation.",
+    "verdict": "inconclusive"
+  },
+  "lisa_counts": {
+    "mismatch_index": {
+      "HH": 39,
+      "HL": 18,
+      "LH": 22,
+      "LL": 22,
+      "ns": 564
+    },
+    "need_score": {
+      "HH": 31,
+      "HL": 17,
+      "LH": 14,
+      "LL": 56,
+      "ns": 547
+    }
+  }
+}

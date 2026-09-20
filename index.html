@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReliefGrid — Find help. Understand need. Close the gap.</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+  { "imports": { "maplibre-gl": "https://esm.sh/maplibre-gl@4.7.1" } }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ── TOP NAVIGATION ──────────────────────────────────────────────── -->
+  <nav id="top-nav">
+    <button class="nav-brand" id="nav-brand" aria-label="ReliefGrid home">
+      <span class="brand-mark">ReliefGrid</span>
+    </button>
+    <div class="nav-tabs" id="nav-tabs"></div>
+    <div class="nav-shell-switch hidden" id="nav-shell-switch"></div>
+  </nav>
+
+  <!-- ── APP ────────────────────────────────────────────────────────── -->
+  <div id="app">
+
+    <div id="map-area"><div id="map"></div></div>
+
+    <!-- ── SIDE PANEL (map-page panels: seeker results + gov map pages) ─ -->
+    <div id="side-panel" class="hidden">
+
+      <aside id="panel-seeker-results" class="side-panel-page hidden">
+        <div class="sr-header">
+          <div>
+            <h2 id="seeker-results-heading">Results</h2>
+            <div id="seeker-results-sub" class="muted small"></div>
+          </div>
+          <div class="seeker-view-toggle" id="seeker-results-view-toggle">
+            <button type="button" data-view="list" id="seeker-results-view-list" class="active">List</button>
+            <button type="button" data-view="map" id="seeker-results-view-map">Map</button>
+          </div>
+        </div>
+        <div id="seeker-results-list" class="seeker-results-list"></div>
+      </aside>
+
+      <aside id="panel-gov-overview" class="side-panel-page hidden">
+        <div class="side-panel-header"><div class="side-panel-kicker">Overview</div><h2>System snapshot</h2></div>
+        <div class="side-panel-body">
+          <div id="gov-overview-tiles" class="metric-tiles-compact"></div>
+          <div class="section-label" style="margin-top:14px">Map layer</div>
+          <div class="layer-group">
+            <label class="layer-radio-label"><input type="radio" name="gov-overview-layer" value="mismatch_index" checked><span>Service Gap</span><span class="layer-hint">Where need is high and access is comparatively low</span></label>
+            <label class="layer-radio-label"><input type="radio" name="gov-overview-layer" value="need_score"><span>Community Need</span><span class="layer-hint">Poverty, rent burden, renter share composite</span></label>
+            <label class="layer-radio-label"><input type="radio" name="gov-overview-layer" value="access_index"><span>Service Access</span><span class="layer-hint">Resources reachable within 15 minutes</span></label>
+            <label class="layer-radio-label"><input type="radio" name="gov-overview-layer" value="none"><span>Resources only</span><span class="layer-hint">Hide the research layer, show service locations</span></label>
+          </div>
+          <label class="layer-check-label"><input type="checkbox" id="gov-overview-facilities-toggle" checked> Show resource locations</label>
+          <label class="layer-check-label"><input type="checkbox" id="gov-overview-avail-toggle" checked> Show availability status <span class="demo-pill">Demo</span></label>
+          <div id="gov-overview-legend" class="legend-section" style="margin-top:10px"></div>
+        </div>
+      </aside>
+
+      <aside id="panel-gov-network" class="side-panel-page hidden">
+        <div class="side-panel-header"><div class="side-panel-kicker">Resource Network</div><h2>All mapped resources</h2></div>
+        <div class="side-panel-body">
+          <div class="search-section">
+            <div class="search-row"><input type="text" id="gov-network-search" placeholder="Name, category, address…" autocomplete="off" /><button id="gov-network-search-clear" class="search-clear" aria-label="Clear search" style="display:none">&times;</button></div>
+            <div id="gov-network-search-results" class="search-results hidden"></div>
+          </div>
+          <div class="section-label" style="margin-top:12px">Live availability <span class="demo-pill">Demo</span></div>
+          <label class="layer-check-label"><input type="checkbox" id="gov-network-avail-toggle" checked> Show availability badges on map</label>
+          <div id="gov-network-avail-filters" style="margin-top:6px"></div>
+          <div id="gov-network-avail-legend" class="legend-section" style="margin-top:10px"></div>
+          <div class="section-label" style="margin-top:12px">Filter by category</div>
+          <div id="gov-network-filter-list"></div>
+          <div id="gov-network-counts" style="margin-top:10px"></div>
+        </div>
+      </aside>
+
+      <aside id="panel-gov-gaps" class="side-panel-page hidden">
+        <div class="side-panel-header"><div class="side-panel-kicker">Service Gaps</div><h2>Where is need high and access low?</h2></div>
+        <div class="side-panel-body">
+          <p class="page-intro">ReliefGrid compares housing-instability risk with how many services are actually reachable, so you can see where that gap is largest.</p>
+          <div class="section-label">Map layer</div>
+          <div class="layer-group">
+            <label class="layer-radio-label"><input type="radio" name="gov-gaps-layer" value="lisa" checked><span>Service Gap Clusters</span><span class="layer-hint">Statistically significant high-need / low-access areas</span></label>
+            <label class="layer-radio-label"><input type="radio" name="gov-gaps-layer" value="mismatch_index"><span>Service Gap (continuous)</span><span class="layer-hint">Community Need minus Service Access</span></label>
+            <label class="layer-radio-label"><input type="radio" name="gov-gaps-layer" value="need_score"><span>Community Need</span><span class="layer-hint">Poverty, rent burden, renter share composite</span></label>
+            <label class="layer-radio-label"><input type="radio" name="gov-gaps-layer" value="access_index"><span>Service Access</span><span class="layer-hint">Resources reachable within 15 minutes</span></label>
+          </div>
+          <label class="layer-check-label" style="margin-top:6px"><input type="checkbox" id="gov-gaps-facilities-toggle"> Show resource locations</label>
+          <div class="section-label" style="margin-top:10px">Travel mode</div>
+          <div class="mode-switch" id="gov-gaps-mode-switch"><button data-mode="drive" class="active">Drive</button><button data-mode="walk">Walk</button></div>
+          <div id="gov-gaps-legend" class="legend-section" style="margin-top:12px"></div>
+        </div>
+        <div id="gov-gaps-tract-detail" class="sidebar-tract-detail">
+          <div class="section-label">Selected area</div>
+          <div id="gov-gaps-detail-body" class="muted small">Click any area on the map for a plain-language read on need vs. access there.</div>
+        </div>
+      </aside>
+
+      <aside id="gov-resource-detail" class="resource-detail-panel hidden" aria-label="Resource details">
+        <div class="rd-panel-head"><button id="gov-resource-detail-close" class="rd-close" aria-label="Back to list">&larr; Back</button><span class="rd-panel-title">Resource details</span><span class="demo-pill">Demo data</span></div>
+        <div id="gov-resource-detail-body" class="rd-body"></div>
+      </aside>
+
+    </div><!-- /#side-panel -->
+
+    <!-- ── CONTENT PAGES (landing, seeker content pages, gov content pages) -->
+    <div id="content-pages">
+
+      <!-- LANDING -->
+      <section id="page-landing" class="content-page active">
+        <div class="landing-wrap">
+          <div class="landing-hero">
+            <div class="landing-word">ReliefGrid</div>
+            <h1>Find help. Understand need.<br>Close the gap.</h1>
+            <p class="landing-sub">ReliefGrid connects people with essential services while helping communities understand where resources are available — and where they're needed most.</p>
+          </div>
+          <div class="landing-paths">
+            <button type="button" class="landing-path landing-path-seeker" id="landing-find-help">
+              <div class="landing-path-icon" aria-hidden="true">🧭</div>
+              <h2>I Need Help</h2>
+              <p>Find shelter, food, healthcare, legal help, and other services near you.</p>
+              <span class="btn btn-primary landing-path-cta">Find Services</span>
+            </button>
+            <button type="button" class="landing-path landing-path-gov" id="landing-open-dashboard">
+              <div class="landing-path-icon" aria-hidden="true">📊</div>
+              <h2>I Manage Services</h2>
+              <p>Governments, nonprofits, and providers: monitor capacity and identify service gaps.</p>
+              <span class="btn btn-secondary landing-path-cta">Open Dashboard</span>
+            </button>
+          </div>
+          <div class="landing-flow">
+            <div class="landing-flow-step"><strong>Find</strong><span>People locate services that actually have room right now.</span></div>
+            <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="landing-flow-step"><strong>Update</strong><span>Providers keep availability and capacity current.</span></div>
+            <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="landing-flow-step"><strong>Understand</strong><span>Governments see system-wide gaps and where to focus.</span></div>
+          </div>
+          <div class="landing-footer">
+            <span id="landing-stat-line"></span>
+            <button type="button" class="landing-methods-link" id="landing-data-methods">How ReliefGrid's data works</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEEKER: HOME -->
+      <section id="page-seeker-home" class="content-page">
+        <div class="seeker-container">
+          <h1 class="seeker-home-title">What do you need help with today?</h1>
+          <div id="seeker-category-grid" class="seeker-cat-grid"></div>
+          <button type="button" class="seeker-link-btn" id="seeker-browse-all">Or browse everything near you</button>
+
+          <div class="seeker-location-block">
+            <div class="section-label">Your location</div>
+            <form id="seeker-location-form" class="seeker-location-form">
+              <input type="text" id="seeker-location-input" placeholder="Enter a Long Island town (e.g. Hempstead)" autocomplete="off" />
+              <button type="submit" class="btn btn-secondary">Go</button>
+            </form>
+            <button type="button" class="btn btn-ghost seeker-use-location-btn" id="seeker-use-location">Use My Location</button>
+            <div id="seeker-location-note" class="seeker-location-note hidden"></div>
+            <div id="seeker-location-badge" class="muted small"></div>
+          </div>
+
+          <div class="section-label" style="margin-top:20px">Quick filters</div>
+          <div id="seeker-quick-filters" class="seeker-quick-filters">
+            <button type="button" data-filter="open_now">Open now</button>
+            <button type="button" data-filter="available_now">Available now</button>
+            <button type="button" data-filter="walk_ins">Walk-ins accepted</button>
+            <button type="button" data-filter="near_me">Near me</button>
+          </div>
+
+          <button type="button" class="guided-cta" id="seeker-guided-start">
+            <strong>Not sure where to start?</strong>
+            <span>Help Me Find the Right Service &rarr;</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- SEEKER: DETAIL -->
+      <section id="page-seeker-detail" class="content-page">
+        <div class="seeker-detail-topbar"><button id="seeker-detail-close" class="rd-close">&larr; Back to results</button></div>
+        <div id="seeker-detail-body" class="seeker-detail-container"></div>
+      </section>
+
+      <!-- SEEKER: GUIDED MATCHING -->
+      <section id="page-seeker-guided" class="content-page">
+        <div class="seeker-container seeker-guided-container">
+          <div class="guided-topbar"><button id="seeker-guided-back" class="rd-close">&larr; Back</button><span id="seeker-guided-indicator" class="muted small"></span></div>
+          <div id="seeker-guided-body"></div>
+          <p class="guided-disclaimer">This is a short set of questions to point you to the right category — not an AI assistant.</p>
+        </div>
+      </section>
+
+      <!-- SEEKER: SAVED -->
+      <section id="page-seeker-saved" class="content-page">
+        <div class="seeker-container">
+          <h1 class="seeker-home-title">Saved</h1>
+          <div id="seeker-saved-list" class="seeker-results-list"></div>
+        </div>
+      </section>
+
+      <!-- SEEKER: ABOUT -->
+      <section id="page-seeker-about" class="content-page">
+        <div class="seeker-container">
+          <h1 class="seeker-home-title">About ReliefGrid</h1>
+          <p>ReliefGrid helps you find shelter, food, healthcare, and other support services on Long Island — and shows what's actually available right now, not just what exists.</p>
+          <div class="landing-flow" style="margin:20px 0">
+            <div class="landing-flow-step"><strong>Find</strong><span>You search by need and location.</span></div>
+            <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="landing-flow-step"><strong>Update</strong><span>Providers keep availability current.</span></div>
+            <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="landing-flow-step"><strong>Understand</strong><span>Governments see the whole picture.</span></div>
+          </div>
+          <div class="demo-banner"><strong>This is a prototype.</strong> Availability information shown throughout ReliefGrid is simulated for demonstration. Always confirm directly with a provider before relying on it.</div>
+          <p class="muted small">ReliefGrid does not collect or store any personal or identifying information about people seeking help. Saved resources are kept only in your own browser, on your own device.</p>
+        </div>
+      </section>
+
+      <!-- GOV: CAPACITY -->
+      <section id="page-gov-capacity" class="content-page">
+        <div class="content-inner">
+          <div class="content-header">
+            <div class="content-kicker">Provider &amp; Government Dashboard</div>
+            <h2>Capacity</h2>
+            <div class="demo-banner"><strong>Demo data.</strong> Availability figures are simulated. "Exists in the network" and "currently reporting availability" are two different things — ReliefGrid keeps them visually distinct throughout.</div>
+          </div>
+          <div class="capacity-controls">
+            <label class="select-label" for="gov-capacity-category-select">Category</label>
+            <select id="gov-capacity-category-select">
+              <option value="">All categories</option>
+              <option value="shelter">Emergency Shelter</option>
+              <option value="food">Food Pantry / Food Bank</option>
+              <option value="health">Healthcare</option>
+              <option value="behavioral_health">Mental Health</option>
+              <option value="legal">Legal Aid</option>
+              <option value="housing_support">Housing Support</option>
+              <option value="outreach">Outreach &amp; Day Services</option>
+              <option value="public_benefits">Public Benefits</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div id="gov-capacity-tiles" class="analytics-tiles"></div>
+          <div class="analytics-charts">
+            <div class="chart-card"><h3>Availability by service type</h3><canvas id="chart-gov-status"></canvas><p class="chart-note">Resource exists vs. resource currently reporting Available/Limited/Full/Closed.</p></div>
+            <div class="chart-card"><h3>Shelter beds: occupied vs. available by county</h3><canvas id="chart-gov-shelter"></canvas></div>
+          </div>
+          <div class="gap-section">
+            <h3>Where need is high but available capacity is not</h3>
+            <p class="page-intro" id="gov-capacity-gap-headline">—</p>
+            <div class="chart-card"><canvas id="chart-gov-gap"></canvas><p class="chart-note">For each high-need census tract, the count of resources currently showing "Available" within roughly a 15-minute drive.</p></div>
+            <div id="gov-capacity-gap-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GOV: PROVIDER UPDATES -->
+      <section id="page-gov-provider" class="content-page">
+        <div class="content-inner">
+          <div class="content-header">
+            <div class="content-kicker">Provider Tools</div>
+            <h2>Provider Updates</h2>
+            <div class="landing-flow" style="margin:10px 0 16px">
+              <div class="landing-flow-step"><strong>Update</strong><span>You set availability here.</span></div>
+              <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
+              <div class="landing-flow-step"><strong>Find</strong><span>People see it instantly in Find Help.</span></div>
+              <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
+              <div class="landing-flow-step"><strong>Understand</strong><span>Governments see it in every dashboard.</span></div>
+            </div>
+            <div class="demo-banner"><strong>Prototype — no login yet.</strong> Updates are saved only in this browser and flow straight into Find Help and the dashboards above as "Provider reported" demo data. Production would sit behind provider authentication and write to the ReliefGrid availability API.</div>
+          </div>
+          <div class="provider-grid">
+            <form id="gov-provider-form" class="provider-form" autocomplete="off">
+              <label class="pf-field"><span class="pf-label">Select your organization / resource</span><select id="gov-provider-resource-select"></select></label>
+              <div id="gov-provider-fields"></div>
+              <div class="pf-actions"><button type="submit" class="btn btn-primary">Update Availability</button><button type="button" id="gov-provider-clear-one" class="btn btn-ghost">Revert to demo</button></div>
+              <div id="gov-provider-toast" class="provider-toast hidden" role="status"></div>
+            </form>
+            <aside class="provider-preview">
+              <div class="section-label">Live preview — how people see this in Find Help</div>
+              <div id="gov-provider-preview-card"></div>
+              <div class="section-label" style="margin-top:16px">Your updates in this browser</div>
+              <div id="gov-provider-update-log" class="provider-log"></div>
+              <button type="button" id="gov-provider-reset-all" class="btn btn-ghost btn-sm" style="margin-top:10px">Reset all demo updates</button>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- GOV: DATA & METHODS -->
+      <section id="page-gov-methods" class="content-page">
+        <div class="content-inner">
+          <div class="content-header"><div class="content-kicker">Data Transparency</div><h2>Data &amp; Methods</h2></div>
+          <div class="method-grid">
+            <div class="method-card"><h3>Community Need</h3><p>A standardized composite of poverty rate, rent burden (paying &ge;30% of income on rent), and renter share per census tract (2022 ACS 5-year estimates). Higher values indicate greater housing-instability risk.</p></div>
+            <div class="method-card"><h3>Service Access</h3><p>An Enhanced 2-Step Floating Catchment Area (E2SFCA) score: resources reachable within a 15-minute travel catchment, weighted by competing household demand, percentile-ranked 0–100.</p></div>
+            <div class="method-card"><h3>Service Gap</h3><p>Community Need minus Service Access (both standardized). Positive values mean need exceeds access. Statistically significant clusters are identified with Local Indicators of Spatial Association (LISA) at the 5% significance level — shown on the map as "Service Gap Clusters."</p></div>
+            <div class="method-card"><h3>Resource network</h3><p>182 shelters, food pantries, clinics, legal aid, and social-service locations across Nassau &amp; Suffolk counties, compiled from county and nonprofit resource lists.</p></div>
+            <div class="method-card"><h3>Availability (prototype)</h3><p>Beds, meals, wait times, and open/closed status shown throughout ReliefGrid are <strong>simulated</strong> for a subset of resources, or entered through the demo Provider Updates page. See <code>services/availability.js</code> for the adapter architecture a real integration (provider APIs, HMIS, Bitfocus Clarity, 211, findhelp, Unite Us, government open data) would plug into.</p></div>
+            <div class="method-card method-limitations"><h3>Limitations</h3><ul>
+              <li>Travel-time catchments are estimated, not live routing.</li>
+              <li>Availability is demo data unless a provider has updated it in this browser session.</li>
+              <li>Eligibility rules are not modeled per resource — always confirm with the provider.</li>
+              <li>McKinney-Vento school data (used in early research) reflects school-identified homelessness only; adults are undercounted.</li>
+            </ul></div>
+          </div>
+          <div class="source-disclaimer-block" style="margin-top:16px">
+            <strong>Disclaimer:</strong> ReliefGrid is a prototype for research, demonstration, and planning discussion. It does not replace contacting a provider directly, and it does not represent a live operational system.
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /#content-pages -->
+
+  </div><!-- /#app -->
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

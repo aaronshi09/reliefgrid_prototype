@@ -1,0 +1,4744 @@
+{
+  "type": "FeatureCollection",
+  "name": "verified_longisland_facilities",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "osm:n10805676402",
+        "name": "Community Solidarity - Hempstead Food Share",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "osm",
+        "address": "Parking lot, Hempstead Town Hall, Cooper St. & Washington Ave. (near 1 Washington St), Hempstead, NY 11550",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6211444,
+          40.7079974
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "osm:w177768210",
+        "name": "Boys & Girls Club of Oyster Bay-East Norwich",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "osm",
+        "address": "1 Pine Hollow Road Oyster Bay NY 11771",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5322934,
+          40.8651077
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "osm:w503641503",
+        "name": "Grenville Baker Boys & Girls Club",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "osm",
+        "address": "135 Forest Avenue Locust Valley NY 11560",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6005976,
+          40.8750709
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "osm:w566442002",
+        "name": "Glen Cove Boys & Girls Club at Lincoln House, Inc.",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "osm",
+        "address": "113 Glen Cove Avenue Glen Cove NY 11542",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6346862,
+          40.8572883
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "licares:fdab5d5e12",
+        "name": "Long Island Cares Inc. - The Harry Chapin Food Bank Essential Market (Bethpage)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "licares",
+        "address": "386 N. Wantagh Ave., Bethpage, NY 11714",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.495738028867,
+          40.735434972268
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "licares:fa27b1820c",
+        "name": "Long Island Cares, Inc. - Nassau Center for Collaborative Assistance",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "licares",
+        "address": "21 East Sunrise Highway, Freeport, NY 11520",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.578572673415,
+          40.656912774907
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "licares:a45bd47ea1",
+        "name": "LIC West Nassau Center for Food Assistance & Community Support",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "licares",
+        "address": "241 Rockaway Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.699796889437,
+          40.660838349377
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:044c7a79f4",
+        "name": "Abundant Life Ministries in Roosevelt",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "700 Prospect Ave",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Coordinates reflect last known service location (organization inactive)",
+        "verification_status": "Closed",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.574132,
+          40.7613995
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:225f2b0567",
+        "name": "Beacon Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "3315 Hillside Ave, New Hyde Park, NY 11040",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6607572,
+          40.7536947
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:8340a0dfec",
+        "name": "Bethel AME Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "420 N Main Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5877074,
+          40.6708978
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:b5a01d4384",
+        "name": "Buddhist Tzu Chi Foundation of Long Island",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "60 E Williston Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6342584,
+          40.7581324
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:e149033c13",
+        "name": "Church of God in Christ Jesus",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "509 Jefferson Ave, Rockville Centre, NY 11570",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6573231,
+          40.6719196
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:ce3360d47d",
+        "name": "Church of God of the First Born Seventh Day",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "42 East Fulton Avenue, Roosevelt, NY 11575",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5870863,
+          40.676076
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:3ef70e47a2",
+        "name": "E Joy Community Resource Center Inc",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "56 Orchard St, Roslyn Heights, NY 11577",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6428131,
+          40.7905903
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:d61373bbef",
+        "name": "Eglise Evangelique Du Bon Samaritain Inc",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "44 Village Ave, Elmont, NY 11003",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7142359,
+          40.6956922
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:3ebdd6c6ed",
+        "name": "Elmont Temple Seventh-day Adventist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "682 Elmont Rd, Elmont, NY 11003",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7185018,
+          40.693336
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:e03e0db3ad",
+        "name": "EOC RVC/Lakeview",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "140 N Centre Ave, Rockville Centre, NY 11570",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6502129,
+          40.6610749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:b400e3989e",
+        "name": "Faith Mission (Formerly Pope Francis)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "132 Jefferson Ave, Mineola, NY 11501",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6402605,
+          40.7481516
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:c6d2cdf5f9",
+        "name": "Family & Children's Association - Hempstead Chemical Dependency Treatment Center (Family Treatment & Recovery Center)",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "126 North Franklin Street, Hempstead, NY 11550",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6277272,
+          40.7102134
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:23a5756fb4",
+        "name": "Feed My Sheep - Old Westbury (Old Westbury Seventh-day Adventist Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "211 Jericho Turnpike, Old Westbury, NY 11568",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5949856,
+          40.766314
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:a395f8f7ba",
+        "name": "First Bethel Church (Premiere Eglise De Bethel)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "2079 Grand Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6080172,
+          40.6592407
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:37abb93d52",
+        "name": "French Speaking Baptist Church of Nassau",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "482 Nassau Rd, Roosevelt, NY 11575",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.592216,
+          40.684677
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:4ac87a6e27",
+        "name": "Gateway Christian Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "502 N. Central Ave., Valley Stream, NY 11580",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7111857,
+          40.679236
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:3c32d4a11d",
+        "name": "Great Neck Kosher Food Pantry (United Mashadi Jewish Community of America - UMJCA)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "574 Middle Neck Road",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7359715,
+          40.8019162
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:af0b9d7bb0",
+        "name": "Hallman Memorial Refreshing Spring Church of God in Christ",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "288 N. Main Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.586719,
+          40.666552
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:baf858be3a",
+        "name": "Harvest for the World - Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "90 Pleasant Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5850621,
+          40.67389
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:3d7fb5c26f",
+        "name": "Hatzilu Rescue Organization - Alfred Nevins Food Warehouse (South Baldwin Jewish Center)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "2959 Grand Ave",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6128124,
+          40.6368469
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:70496bb9e8",
+        "name": "Hempstead Assembly of God - Open Arms Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "622 Front Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6099032,
+          40.7089925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:3e80e14119",
+        "name": "Hispanic Brotherhood of Rockville Centre, Inc.",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "59 Clinton Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6456646,
+          40.6607116
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:4948465763",
+        "name": "Holy Name of Mary R.C. Church - St. Vincent de Paul Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "55 East Jamaica Avenue, Valley Stream, NY 11580",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6972603,
+          40.6613862
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:d770aa8957",
+        "name": "Holy Spirit Parish Social Ministry / Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "16 S. 6th St., New Hyde Park, NY 11040",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.688613,
+          40.731009
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:43168b40c7",
+        "name": "Holy Trinity Baptist Church of Westbury",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "604 Union Avenue, Westbury, NY 11590",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5781035,
+          40.7588426
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:093216ca65",
+        "name": "Islamic Center of Long Island (ICLI) Community Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "835 Brush Hollow Road, Westbury, NY 11590",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5707311,
+          40.7658843
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:6c0267f7ef",
+        "name": "Mary Brennan INN",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "100 Madison Avenue, Hempstead, NY 11550",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6277732,
+          40.7020021
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:0e9706b3e3",
+        "name": "Ladles of Hope - Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "228 South Ocean Avenue, Freeport, NY 11520 (at South Nassau Unitarian Universalist Congregation)",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58604,
+          40.6493017
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:7e8dd0dee4",
+        "name": "Ladles of Hope, Inc. - Soup Kitchen/Food Pantry (Freeport site)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "87 Pine Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5855363,
+          40.6549208
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:7c4968ffe1",
+        "name": "Littig House Community Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "72 Harbor Homes",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6903935,
+          40.8431648
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:22246aa813",
+        "name": "Long Beach Soup Kitchen",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "140 West Pine Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6677169,
+          40.5923733
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:0970bf4bdb",
+        "name": "Lutheran Social Services of New York - The New LIFE Center Long Island",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "145 Franklin Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6768969,
+          40.704007
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:c747cb5466",
+        "name": "Memorial Presbyterian Church (Feed My Sheep Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "189 Babylon Turnpike",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5834749,
+          40.6755308
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:213313330b",
+        "name": "Naomi Temple A.M.E. Zion Church - Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "59 Babylon Turnpike",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5863502,
+          40.6775899
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:2639631f7b",
+        "name": "National Council of Negro Women, Inc. \u2013 Long Island Cross County Section",
+        "type": "other",
+        "resource_group": "other",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "No fixed service address (rotating venues) \u2014 Long Island Cross County Section, NCNW; mailing: P.O. Box 626, Westbury, NY 11590",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Mobile/outreach service \u2014 no fixed address; coordinates are approximate",
+        "verification_status": "Verified (mobile service)",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6180909,
+          40.7079838
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:2d3502fd22",
+        "name": "National Day Laborer Organizing Network / CoLoKi Inc.",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "228 S. Ocean Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Coordinates reflect last known service location (organization inactive)",
+        "verification_status": "Closed",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5860512,
+          40.6493456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:6409a96895",
+        "name": "New Jerusalem Seventh-day Adventist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "181 Greenwich Street, Hempstead, NY 11550",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6181599,
+          40.7007984
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:14abbecc26",
+        "name": "New Life Ministries",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "167 Fulton Avenue, Hempstead, NY 11550",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6302109,
+          40.7075649
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:69774c97ce",
+        "name": "North Shore Soup Kitchen",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "7 Continental Place, Glen Cove, NY 11542",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6316138,
+          40.8623312
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:7adeec064e",
+        "name": "NOSH Delivers Inc.",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "15 Hill Street, Glen Cove, NY 11542",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6360194,
+          40.866102
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:ddd1eb5bfb",
+        "name": "Our Holy Redeemer Parish Outreach",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "87 Pine Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5854531,
+          40.65478
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:927af5e3c9",
+        "name": "Our Lady of Fatima Church - Outreach/Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "10 Cottonwood Road",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7107549,
+          40.8427413
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:c083e65025",
+        "name": "Our Lady of Lourdes Church - Malverne (Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "65 Wright Avenue, Malverne, NY 11565",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6678268,
+          40.6733554
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:8b47480cde",
+        "name": "Perfecting Faith Church (Operation Hunger Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "311 N. Main St.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5874773,
+          40.6669656
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:666ca03c35",
+        "name": "Queen of the Most Holy Rosary Parish Social Ministry (Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "196 W. Centennial Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5952059,
+          40.6765825
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:5cb416204e",
+        "name": "New York Race Track Chaplaincy (Race Track Chaplaincy of America - Metropolitan New York Division), Belmont Park",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "2150 Hempstead Turnpike",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7204331,
+          40.7095209
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:52fb28962d",
+        "name": "Rehoboth Fellowship Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "232 Front Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.626883,
+          40.7051634
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:65f49d1eb9",
+        "name": "Renacer Outreach Program (Reborn Christian Center / Centro Cristiano Renacer)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "475 North Brookside Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6018302,
+          40.6692087
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:7ee2883acd",
+        "name": "Roosevelt Bible Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "160 Nassau Road",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5880984,
+          40.676455
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:179a839c50",
+        "name": "The Salvation Army - Freeport Corps Community Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "66 Church Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5825548,
+          40.6549371
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:9d5d91f5c5",
+        "name": "The Salvation Army - Hempstead Citadel Corps Community Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "65 Atlantic Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6316368,
+          40.7133659
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:9e9cf03848",
+        "name": "Hempstead Seventh-day Adventist Church (Hempstead SDA Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "83 Greenwich Street, Hempstead, NY 11550",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6209689,
+          40.7032778
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:6250f745fd",
+        "name": "Sharon's MLK Pantry (at Dr. Martin Luther King Jr. Community Center)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "150 North Centre Avenue, Rockville Centre, NY 11570",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6503379,
+          40.6617842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:751a3987a5",
+        "name": "Manhasset Food Pantry (operated by People Loving People, formerly Shelter Rock Church Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "65 High Street, Manhasset, NY 11030",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Replaced",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7073156,
+          40.7841215
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:4f37f3cb51",
+        "name": "Social Service Volunteers of Nassau County, Inc.",
+        "type": "other",
+        "resource_group": "other",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "60 Charles Lindbergh Boulevard, Uniondale, NY 11553",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Administrative office location",
+        "verification_status": "Verified (administrative office)",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6026074,
+          40.7243501
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:687390d468",
+        "name": "Soup To Nuts Soup Kitchen (at Christ Lutheran Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "61 N. Grove St.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5865113,
+          40.6592969
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:4031363a64",
+        "name": "South Hempstead Baptist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "81 Maple Ave",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6275097,
+          40.6994633
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:299555610e",
+        "name": "St. Aloysius Interfaith Food Pantry (Parish Outreach, with St. Vincent de Paul Society)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "592 Middle Neck Road",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7364312,
+          40.8023678
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:0459326f8d",
+        "name": "St. Anthony's Conference of the Society of St. Vincent de Paul (St. Anthony of Padua Parish)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "110 Anchor Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6430931,
+          40.6370856
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:c1903d321d",
+        "name": "St. Boniface Martyr Parish - Parish Outreach (Food Pantry & Thrift Shop)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "145 Glen Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6416173,
+          40.8483332
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:eccd8bec37",
+        "name": "St. Boniface Roman Catholic Church - Parish Social Ministry / Human Services (Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "631 Elmont Road",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7166169,
+          40.6944921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:97314cb6c2",
+        "name": "St. Brigid Roman Catholic Church - Parish Outreach Food Pantry (Fr. Schaefer Outreach Center)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "75 Post Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5871553,
+          40.750819
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:7c67e3d3f0",
+        "name": "The Church of St. Christopher - Parish Outreach Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "11 Gale Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6143421,
+          40.6521866
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:a45570acd5",
+        "name": "St. George's Episcopal Church (Historic St. George's Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "319 Front St",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6229896,
+          40.7068631
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:6cfcfdc231",
+        "name": "St. Gertrude Food Pantry (St. Vincent de Paul Society)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "28 School St",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5666824,
+          40.9089277
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:89b3079577",
+        "name": "St. Joachim Outreach",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "614 Central Avenue, Cedarhurst, NY 11516",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72076,
+          40.623941
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:d48418e228",
+        "name": "St. John's Baptist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "1025 Prospect Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5589297,
+          40.7632956
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:2e93669262",
+        "name": "St. Martha's Social Outreach (Saint Martha Roman Catholic Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "546 Greengrove Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.596172,
+          40.7021532
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:e4c6d32f71",
+        "name": "St. Mary of The Isle - Food Pantry (Beach Catholic Outreach)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "315 East Walnut Street",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6547707,
+          40.5881547
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:fab83e5573",
+        "name": "St. Mary's Outreach (Church of St. Mary, Roslyn \u2014 Msgr. Ryan Hall)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "440 Round Hill Road",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6358682,
+          40.7907762
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:cb956a64da",
+        "name": "St. Paul AME Church - Love Beyond Limits",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "453 Pershing Blvd.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6555065,
+          40.6697066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:52d08bc90f",
+        "name": "St. Peter of Alcantara Parish Social Ministry (Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "1317 Port Washington Boulevard, Port Washington, NY 11050 (rear of the IHM Center, by the Little Learners Playground)",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.689478,
+          40.840807
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:3d04f88926",
+        "name": "St. Raymond's Parish",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "12 Roosevelt Avenue, East Rockaway, NY 11518",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6675076,
+          40.6491341
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:9a52c284d7",
+        "name": "St. Vincent de Paul Parish / Society of St. Vincent de Paul Outreach - Elmont",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "1500 De Paul Street, Elmont, NY 11003",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6965904,
+          40.7099149
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:86932a1d09",
+        "name": "The S.H.O.P. (Sustenance Hope Opportunities Place) - The Marion & Aaron Gural JCC",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "591 Malvin Mall (Maple Plaza), Cedarhurst, NY 11516",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7242983,
+          40.6228819
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:d584d9483a",
+        "name": "Village Church of Bayville (United Methodist) - Mimi Merlin Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "9 Mountain Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5619434,
+          40.9092737
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:909807fd8c",
+        "name": "The Way Community",
+        "type": "other",
+        "resource_group": "other",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "24 Woods Ave",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Coordinates reflect last known service location (organization inactive)",
+        "verification_status": "Closed",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5906286,
+          40.6791777
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:c902446841",
+        "name": "Trinity Lutheran Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "74 Forest Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6237716,
+          40.8721372
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:f30ee4a7b9",
+        "name": "Triumphant Agape House",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "136 W. Fulton Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5932508,
+          40.6757769
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:e0957743c7",
+        "name": "Union Baptist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "24 Clinton C. Boone Place",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6253354,
+          40.7006834
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:5002effa8e",
+        "name": "The United Methodist Church of Uniondale",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "720 Uniondale Avenue",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5950449,
+          40.6964526
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:bffb70b034",
+        "name": "Westbury United Methodist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "265 Asbury Ave.",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5886275,
+          40.7624422
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:4bce1b7df5",
+        "name": "Valley Stream Baptist Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "1865 North Central Ave, Valley Stream, NY 11580",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7156538,
+          40.6842935
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:0105c87340",
+        "name": "Veterans Food Pantry \u2013 Vet Mart (Nassau County Veterans Service Agency)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "2201 Hempstead Turnpike, Building Q, East Meadow, NY 11554",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5542677,
+          40.7261456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:b60e1e5660",
+        "name": "Vision of Hope Caregivers, Inc.",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "569 National Blvd, Long Beach, NY 11561",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6673547,
+          40.5914583
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:1df4b9fcef",
+        "name": "Westbury Divine Church of God",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "911 Brush Hollow Rd, Westbury, NY 11590",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5682927,
+          40.7680334
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "iharvest:a83a8ba2b5",
+        "name": "Westbury Neighborhood Association, Inc. (d/b/a Neighborhood House)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "iharvest",
+        "address": "334 Winthrop St, Westbury, NY 11590",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Existing Nassau geocoded facility layer",
+        "verification_status": "Verified",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5867643,
+          40.757835
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "rhy:b92c8e853a",
+        "name": "SCO Family of Services - Nassau/Long Island Office",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "rhy",
+        "address": "1415 Kellum Place, Suite 140, Garden City, NY 11530",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Administrative office location",
+        "verification_status": "Verified (administrative office)",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63734,
+          40.73667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "rhy:9457d87593",
+        "name": "Family and Children's Association",
+        "type": "shelter",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Nassau",
+        "source": "rhy",
+        "address": "Confidential location (runaway/homeless-youth shelter) \u2014 Nassau County, NY; contact Family & Children's Association for referral",
+        "opening_time": "",
+        "short_description": "",
+        "coordinate_note": "Confidential service location \u2014 coordinates are approximate/placeholder, not an exact address",
+        "verification_status": "Verified (confidential location)",
+        "source_url": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62997,
+          40.74102
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:815e093e6f",
+        "name": "Suffolk County Department of Social Services - Main Office",
+        "type": "shelter_intake",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "3085 Veterans Memorial Hwy, Ronkonkoma, NY 11779",
+        "opening_time": "Mon-Fri business hours; after-hours emergency services phone available",
+        "short_description": "County contact point for people who are homeless or at risk of homelessness; after-hours emergency services phone listed by county.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.136755,
+          40.7891884
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:042bf8abb6",
+        "name": "Suffolk County DSS - Coram Center",
+        "type": "shelter_intake",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "80 Middle Country Rd, Coram, NY 11727",
+        "opening_time": "Report before 3:00 PM during normal business hours",
+        "short_description": "DSS center listed for emergency housing access and central housing services.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.9830411,
+          40.8723292
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:e15704f1e0",
+        "name": "Suffolk County DSS - Riverhead Center",
+        "type": "shelter_intake",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "605 Old Country Rd, Riverhead, NY 11901",
+        "opening_time": "Report before 3:00 PM during normal business hours",
+        "short_description": "DSS center listed for emergency housing access; emergency and non-emergency contact numbers published.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.6610038,
+          40.9325231
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:c74e8ec47e",
+        "name": "Suffolk County DSS - South West Center",
+        "type": "shelter_intake",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "2 S 2nd St, Deer Park, NY 11729",
+        "opening_time": "Report before 3:00 PM during normal business hours",
+        "short_description": "DSS center listed for emergency housing access in western Suffolk.",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.3299,
+          40.7619
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:c232fcf881",
+        "name": "Suffolk County DSS - Smithtown Center",
+        "type": "shelter_intake",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "200 Wireless Blvd, Hauppauge, NY 11788",
+        "opening_time": "Report before 3:00 PM during normal business hours",
+        "short_description": "DSS center listed in community resource guide for services including Medicaid/public assistance connection.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2662809,
+          40.8142411
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:77fd29c219",
+        "name": "Family Service League - The Linkage Center (TLC)",
+        "type": "shelter_intake",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "790 Park Avenue, Huntington, NY 11743",
+        "opening_time": "Overnight accommodations by DSS referral",
+        "short_description": "TLC offers overnight accommodations, showers, linens, meals, intake, assessment, referral, and crisis intervention to DSS-referred individuals without housing.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.fsl-li.org/find-help/housing-homeless-services/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.3913371,
+          40.8576055
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:d5cf5795c2",
+        "name": "Family Service League - DASH (Diagnostic, Assessment, Stabilization Hub) Crisis Care Center",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "90 Adams Ave, Hauppauge, NY 11788",
+        "opening_time": "24/7",
+        "short_description": "Crisis care center that can support people in behavioral health crisis, an important homelessness-risk support service.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://scnylegislature.us/DocumentCenter/View/84365/2024-Suffolk-County-Directory-of-Behavioral-Health-Services---Guide-to-Services-and-Supports-PDF"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2569235,
+          40.8173466
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:5a9a44ec3a",
+        "name": "Maureen's Haven Homeless Outreach",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "28 Lincoln St, Riverhead, NY 11901",
+        "opening_time": "Seasonal shelter program; hours vary by site",
+        "short_description": "East End nonprofit providing homeless outreach and seasonal shelter support; Stony Brook resource page lists Maureen's Haven as a local shelter not through DSS.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.maureenshaven.org/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.666467,
+          40.9221496
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:1875d536ce",
+        "name": "Pax Christi Hospitality Center (operated by Hope House Ministries)",
+        "type": "shelter",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "255 Oakland Ave, Port Jefferson, NY 11777",
+        "opening_time": "Year-round; call first / may need DSS approval",
+        "short_description": "Local shelter resource listed as year-round for males ages 16+; public address used for mapping.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.0530698,
+          40.9346923
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:14e44c6f05",
+        "name": "Ryhan's Center of Hope, Inc.",
+        "type": "shelter",
+        "resource_group": "shelter",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "Suffolk County, NY",
+        "opening_time": "DSS referral required; after-hours DSS emergency number available",
+        "short_description": "Provides emergency shelter to Suffolk County homeless families and individuals through contract with Suffolk County DSS.",
+        "coordinate_note": "Confidential service location \u2014 coordinates are approximate/placeholder, not an exact address",
+        "verification_status": "Verified (confidential location)",
+        "source_url": "https://www.ryhanscenterofhope.com/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.0718,
+          40.823
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:84cbe3e6ef",
+        "name": "Long Island Coalition for the Homeless (LICH)",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "600 Albany Ave, Suite 2, Amityville, NY 11701",
+        "opening_time": "Call first",
+        "short_description": "Lead entity addressing homelessness on Long Island; provides direct care, housing-focused case management, helpline, and coordination of referrals.",
+        "coordinate_note": "Administrative office location",
+        "verification_status": "Verified",
+        "source_url": "https://www.addressthehomeless.org/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.4041664,
+          40.7084766
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:3df3e7c517",
+        "name": "H.E.L.P. Suffolk (HELP USA - Suffolk)",
+        "type": "shelter",
+        "resource_group": "shelter",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "685 Brookhaven Ave, Bellport, NY 11713",
+        "opening_time": "Food pantry: call first; shelter services through referral",
+        "short_description": "HELP Suffolk is listed as a food pantry and has historically provided emergency family housing services.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf ; https://suffolkcountyny.gov/Portals/2/documents/Report_2023-09_SC_Emergency_Housing_Services_Program.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.9356523,
+          40.7799883
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:e7402d443d",
+        "name": "Concern for Independent Living, Inc. (Concern Housing)",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "312 Expressway Dr S, Medford, NY 11763",
+        "opening_time": "Call first",
+        "short_description": "Provider of housing and support services; useful as a supportive-housing resource layer rather than a walk-in shelter.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.concernhousing.org/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.9960786,
+          40.8228132
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:705ee8ffeb",
+        "name": "Association for Mental Health and Wellness (Pollack Center)",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "939 Johnson Ave, Ronkonkoma, NY 11779",
+        "opening_time": "Call first",
+        "short_description": "Behavioral-health and housing support provider; Suffolk audit identifies AMHW as an emergency housing services contractor.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://mhaw.org/ ; https://suffolkcountyny.gov/Portals/2/documents/Report_2023-09_SC_Emergency_Housing_Services_Program.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.1216515,
+          40.8081149
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:d9b0baa3d6",
+        "name": "East Hampton Food Pantry (Amagansett site \u2014 St. Michael's Lutheran Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "486 Montauk Hwy, Amagansett, NY 11930",
+        "opening_time": "Wednesdays 9am-2pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Coordinates reflect prior service location (service discontinued at this site)",
+        "verification_status": "Service Discontinued",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.1299298,
+          40.978941
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:23e7d9b411",
+        "name": "Ace Community Center / EOC Family Development Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "48 Cedar Rd, Amityville, NY 11701",
+        "opening_time": "Thursday 10am-2pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.4073261,
+          40.7103031
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:4c4eb92634",
+        "name": "Christian Life Center Church Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "450 Bayview Ave, Amityville, NY 11701",
+        "opening_time": "Wednesday 12-2pm; Sunday 1-2pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.4092194,
+          40.6864154
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:1bd1bab5af",
+        "name": "St. Martin of Tours Parish Outreach",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "37 Union Ave, Amityville, NY 11701",
+        "opening_time": "Tuesday/Wednesday/Friday 10am-3:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.4163379,
+          40.6777348
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:06da050db4",
+        "name": "Our Redeemer Lutheran Church Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "269 Main Rd, Aquebogue, NY 11931",
+        "opening_time": "Friday 10am-noon",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.6221,
+          40.9433
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:398f46a771",
+        "name": "Deacons' Food Pantry (First Presbyterian Church of Babylon)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "79 E Main St, Babylon, NY 11702",
+        "opening_time": "Monday 10am-1pm; Thursday 4-6pm; Friday 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.3222996,
+          40.6969616
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:96b1f1e2f2",
+        "name": "Bay Shore Emergency Food Pantry (Bay Shore Emergency Food Program Inc.)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "28 Brentwood Rd, Bay Shore, NY 11706",
+        "opening_time": "Monday/Wednesday/Friday 12pm-2pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2356605,
+          40.7284492
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:2326f38b21",
+        "name": "Pronto of Long Island Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "128 Pine Aire Dr, Bay Shore, NY 11706",
+        "opening_time": "Mon-Fri 9am-2pm; Saturday 9am-12pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2730497,
+          40.7731651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:ee781fa351",
+        "name": "United Veterans Beacon House Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1715 Union Blvd, Bay Shore, NY 11706",
+        "opening_time": "Monday/Wednesday/Saturday 9am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2510233,
+          40.7248602
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:7f5b0aee2b",
+        "name": "Lighthouse Mission",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "500 Patchogue Ave, Bellport, NY 11713",
+        "opening_time": "Saturday 12pm-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Mobile/outreach service \u2014 no fixed address; coordinates are approximate",
+        "verification_status": "Verified (mobile service)",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.9480053,
+          40.7763191
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:e8116680a0",
+        "name": "Mary Immaculate Food Pantry (Mary Immaculate R.C. Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "16 Brown's Ln, Bellport, NY 11713",
+        "opening_time": "Wednesday 10-11am; Friday 10-11am & 6-7pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.9354224,
+          40.7573765
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:f53dd7d385",
+        "name": "Our Lady of the Snow (Parish Outreach / Food & Concern Ministry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "175 Blue Point Avenue, Blue Point, NY 11715",
+        "opening_time": "Mon-Thurs 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.0354165,
+          40.7472921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:a04a452363",
+        "name": "St. John Nepomucene Parish Social Ministry / Bob Walther Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1140 Locust Ave, Bohemia, NY 11716",
+        "opening_time": "Tuesday 10am-3pm & 6-7pm; Wednesday 10am-3pm; Thursday 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.1165101,
+          40.7701482
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:51364e2b3c",
+        "name": "Bethel Pentecostal Church of God in Christ",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "72 Eisenhower Ave, Brentwood, NY 11717",
+        "opening_time": "Saturday 12-2pm; Sunday 2-4:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2752608,
+          40.7820142
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:3d3841fd36",
+        "name": "Family Service League - Brentwood (Crooked Hill Rd)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "801 Crooked Hill Rd, Brentwood, NY 11717",
+        "opening_time": "Mon-Fri 10am-12pm; Sat/Sun 2pm-7:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2812369,
+          40.8007987
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:8b476f19cf",
+        "name": "Hospitality Too Soup Kitchen (St. Anne's R.C. Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "Sisters of St. Joseph Campus (Gym), approx. 1725 Brentwood Rd, Brentwood, NY 11717 (campus-level address; exact gym building/entrance not officially published)",
+        "opening_time": "Thursday 9am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2401658,
+          40.7727096
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:8344531198",
+        "name": "St. Luke's R.C. Church Outreach (FRESH START Program)",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "266 Wicks Rd, Brentwood, NY 11717",
+        "opening_time": "Tuesday/Thursday 10am-12pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2660766,
+          40.7882807
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:550af0f4c8",
+        "name": "Bridgehampton Community Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "2357 Montauk Hwy, Bridgehampton, NY 11932",
+        "opening_time": "Wednesday 11am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.305989,
+          40.935417
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:5d3252aad7",
+        "name": "Children's Museum of the East End (CMEE) Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "376 Bridgehampton Sag Harbor Tpke, Bridgehampton, NY 11932",
+        "opening_time": "Thursday 4-6pm biweekly",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.299856,
+          40.946408
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:ce15edc09a",
+        "name": "Center Moriches United Methodist Church / Bert Strand Memorial Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "464 Main St, Center Moriches, NY 11934",
+        "opening_time": "Thursday 12pm-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.7964823,
+          40.8001801
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:c93505bcbb",
+        "name": "St. John the Evangelist R.C. Church - Ernie's Place Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "25 Ocean Ave, Center Moriches, NY 11934",
+        "opening_time": "Monday 6:30-7:30pm; Thursday 3-4pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.787251,
+          40.799106
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:cedafca93d",
+        "name": "Assumption of BVM Outreach (Assumption of the Blessed Virgin Mary R.C. Church, Parish Social Ministry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "20 Chestnut St, Centereach, NY 11720",
+        "opening_time": "Tuesday/Wednesday/Friday 11am-1pm by appointment",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.100591,
+          40.861064
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:688b2d2101",
+        "name": "Our Savior Lutheran Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "140 Mark Tree Rd, Centereach, NY 11720",
+        "opening_time": "Monday & Thursday 3:30-5:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.084617,
+          40.864509
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:bbfe858cf9",
+        "name": "Central Islip Civic Council, Inc.",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "68 Wheeler Rd, Central Islip, NY 11722",
+        "opening_time": "Thursday 10am-3:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.20781,
+          40.795329
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:efcfda3d33",
+        "name": "Food for Thought @ Adelante (Adelante of Suffolk County, Inc.)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "83 Carleton Ave, Central Islip, NY 11722",
+        "opening_time": "Thursday 10am-2pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.201055,
+          40.786559
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:4766ddd36c",
+        "name": "Holy Church of Christ",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "41 Sage St, Central Islip, NY 11722",
+        "opening_time": "Mon-Fri 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.212249,
+          40.785503
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:64daea003e",
+        "name": "St. John of God Parish (Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "84 Carleton Ave, Central Islip, NY 11722",
+        "opening_time": "Monday 6am-7pm; Tuesday 10am-12pm; Wednesday 10am-2pm; Thursday 6am-7pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.200867,
+          40.786364
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:15358eebd0",
+        "name": "Our Lady of the Assumption Outreach",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "115 Leonardo Da Vinci, Copiague, NY 11726",
+        "opening_time": "Tuesday/Thursday 10:15am-12pm & 1:15-3pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.403908,
+          40.682597
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:3ab2b3c5d0",
+        "name": "Faith Baptist Church Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "10 Teller Ave, Coram, NY 11727",
+        "opening_time": "Mon-Fri 9am-1:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.97991,
+          40.86038
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:3399b363cb",
+        "name": "New Beginnings Christian Center",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "241 Middle Country Rd, Coram, NY 11727",
+        "opening_time": "Saturday 9am-11am",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.994186,
+          40.871403
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:bf735f7698",
+        "name": "St. Frances Cabrini R.C. Church - Parish Social Ministry Outreach and Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "134 Middle Country Rd, Coram, NY 11727",
+        "opening_time": "Monday/Wednesday/Friday 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.986979,
+          40.872259
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:731c1a3629",
+        "name": "WellLife Network Food Pantry - Coram",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "3600 Route 112, Coram, NY 11727",
+        "opening_time": "Mon-Fri 9am-4:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.998452,
+          40.856794
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:b59e68a487",
+        "name": "Hope Community Ministries",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "64 Tiber Ave, Deer Park, NY 11729",
+        "opening_time": "Thursday 12pm-3:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.309011,
+          40.748928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:55a4ace272",
+        "name": "Mercy House Food and Clothing Pantry (Upper Room Church)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "722 Deer Park Rd, Dix Hills, NY 11746",
+        "opening_time": "Call ahead; open 7 days",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.338042,
+          40.782375
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:35e6635b54",
+        "name": "Springs Community Presbyterian Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "5 Old Stone Hwy, East Hampton, NY 11937",
+        "opening_time": "Wednesday 3pm-6:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.156491,
+          41.021396
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:567c4803f1",
+        "name": "Church of St. Mary \u2014 Parish Social Ministry/Outreach",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "20 Harrison Ave, East Islip, NY 11730",
+        "opening_time": "Mon-Wed 9:30am-2pm; Thursday 1-4pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.195346,
+          40.72993
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:350012ede1",
+        "name": "St. Francis of Assisi Church \u2014 St. Vincent de Paul Food Pantry",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "29 Northgate Dr, Greenlawn, NY 11740",
+        "opening_time": "Mon-Fri 10am-12pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.358529,
+          40.862344
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:86594eab3b",
+        "name": "CAST (Center for Advocacy, Support & Transformation) \u2014 formerly Community Action Southold Town",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "53930 Main Road, Southold, NY 11971",
+        "opening_time": "Monday & Friday 9am-12pm; Tuesday 3-6pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.427744,
+          41.064328
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:c5f7fb581f",
+        "name": "North Fork Parish Outreach (NFPO) at St. Agnes Church",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "532 6th Ave, Greenport, NY 11944",
+        "opening_time": "Mon-Thurs 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.3608,
+          41.1034
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:184d1d79a9",
+        "name": "St. Rosalie's Roman Catholic Church (St. Rosalie's Community Food Pantry)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "31 E Montauk Hwy, Hampton Bays, NY 11946",
+        "opening_time": "Tuesday/Wednesday/Thursday 10am-2pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Approximate location \u2014 precise coordinates pending further geocoding",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.5174,
+          40.8764
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:c528b32f83",
+        "name": "Long Island Cares - Hampton Bays Food Pantry (Hunger Assistance & Humanitarian Center of the Hamptons)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "286 W Montauk Hwy, Hampton Bays, NY 11946",
+        "opening_time": "Mon/Wed/Fri 9am-3pm; Tues/Thurs 9am-4pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.498182,
+          40.884574
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:a58b0cf65f",
+        "name": "EAC Network - Nutrition Education & Food Services",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "60 Plant Ave, Hauppauge, NY 11788",
+        "opening_time": "Call first",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.243315,
+          40.81374
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:531a7aa3dc",
+        "name": "Long Island Cares, Inc. (Harry Chapin Food Bank) - Headquarters, 10 Davids Drive",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "10 Davids Dr, Hauppauge, NY 11788",
+        "opening_time": "Mon-Thurs 8:30am-4:30pm; Friday 8:30am-3:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Administrative headquarters location",
+        "verification_status": "Replaced",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.257065,
+          40.818895
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:cd4e12a63e",
+        "name": "Abundant Life Church of God (Abundant Life Ministries)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "440 Furrows Rd, Holbrook, NY 11741",
+        "opening_time": "Mon-Fri 9:30am-4pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.067919,
+          40.807898
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:e9c4148535",
+        "name": "Church of the Good Shepherd (Roman Catholic)",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1370 Grundy Ave, Holbrook, NY 11741",
+        "opening_time": "Tuesday & Thursday 10am-12pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.076789,
+          40.799341
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:74e19e68cd",
+        "name": "Helping Hand Rescue Mission",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "225 Broadway, Huntington Station, NY 11746",
+        "opening_time": "Tuesday & Thursday 10am-1pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.403301,
+          40.856253
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:8e6d873887",
+        "name": "Long Island Cares First Stop Pantry - Huntington Station",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "220 Broadway, Huntington Station, NY 11746",
+        "opening_time": "Mon/Wed/Fri 9am-2:30pm; Tues/Thurs 9am-4:30pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.403363,
+          40.856098
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:7f08216b04",
+        "name": "Tri Community and Youth Agency (Tri-CYA)",
+        "type": "other",
+        "resource_group": "other",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "809 New York Avenue, Huntington, NY 11743",
+        "opening_time": "Tue-Sat 10:30am-5pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.417304,
+          40.858851
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:3f7c49ba5d",
+        "name": "WellLife Network Food Pantry - Huntington",
+        "type": "food_pantry",
+        "resource_group": "food",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "55 Horizon Dr, Huntington, NY 11743",
+        "opening_time": "Monday 11am-3pm",
+        "short_description": "Food pantry or food assistance location listed in Suffolk County food pantry directory; hours may change.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://suffolkcountyny.gov/Portals/3/Docs/Food%20Pantries%20in%20Suffolk%20County.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.421898,
+          40.857206
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:b8158dd44b",
+        "name": "Sun River Health - Maxine S. Postal Tri-Community Health Center",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1080 Sunrise Hwy, Amityville, NY 11701",
+        "opening_time": "Medical: Mon/Tues/Thurs 8am-6:30pm; Wed 8am-6pm; Fri 8am-5pm",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.409689,
+          40.689195
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:f944cf642a",
+        "name": "Sun River Health - Brentwood Health Center",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1869 Brentwood Rd, Brentwood, NY 11717",
+        "opening_time": "Call for appointment",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.246094,
+          40.77937
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:414828b578",
+        "name": "Sun River Health Elsie Owens Health Center at Coram",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "82 Middle Country Rd, Coram, NY 11727",
+        "opening_time": "Call for appointment",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.98366,
+          40.872702
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:4ad485ba76",
+        "name": "Sun River Health Patchogue",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "501 N Ocean Ave, Patchogue, NY 11772",
+        "opening_time": "Call for appointment",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.01577,
+          40.780928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:cbf02001c5",
+        "name": "Sun River Health Shirley (The Marilyn Shellabarger Community Health Center)",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "550 Montauk Hwy, Shirley, NY 11967",
+        "opening_time": "Call for appointment",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.879144,
+          40.800002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:6ed41ca948",
+        "name": "Sun River Health Greenport",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "327 Front St, Greenport, NY 11944",
+        "opening_time": "Call for appointment",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.363366,
+          41.101513
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:e35fe59239",
+        "name": "Sun River Health Riverhead",
+        "type": "health",
+        "resource_group": "health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "300 Center Drive South, Riverhead, NY 11901",
+        "opening_time": "Call for appointment",
+        "short_description": "Community health center serving low-income, uninsured, underinsured, Medicaid and Medicare patients; useful healthcare-access layer for homelessness resource allocation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.suffolkcountyny.gov/Departments/Health-Services/Patient-Care/Health-Centers ; https://www.sunriver.org/your-health/amityville-3/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.668664,
+          40.912654
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:9c10d2ec3a",
+        "name": "Legal Services of Long Island - Islandia Office",
+        "type": "legal",
+        "resource_group": "legal",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1757 Veterans Hwy, Suite 50, Islandia, NY 11749",
+        "opening_time": "Intake generally Mon-Fri 9am-5pm; call first",
+        "short_description": "Free civil legal services including housing and eviction matters for eligible low-income residents.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.nycourts.gov/LegacyPDFS/courts/10jd/suffolk/PDF/SuffolkCountyHousingReferralsLegalOnlyEnglish.pdf ; https://legalservicesli.org/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.179735,
+          40.806305
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:91c55ff821",
+        "name": "Legal Services of Long Island - Riverhead Office",
+        "type": "legal",
+        "resource_group": "legal",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "400 W Main St, Suite 200, Riverhead, NY 11901",
+        "opening_time": "Intake generally Mon-Fri 9am-5pm; call first",
+        "short_description": "Free civil legal services including housing and eviction matters for eligible residents on the East End.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.nycourts.gov/LegacyPDFS/courts/10jd/suffolk/PDF/SuffolkCountyHousingReferralsLegalOnlyEnglish.pdf ; https://legalservicesli.org/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.669441,
+          40.918615
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:0dd2763292",
+        "name": "Legal Aid Society of Suffolk County - District Court Bureau",
+        "type": "legal",
+        "resource_group": "legal",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "400 Carleton Ave, 4th Floor, Central Islip, NY 11722",
+        "opening_time": "Call first",
+        "short_description": "Legal Aid Society office at the Cohalan Court Complex; relevant for low-income legal access and court navigation.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://sclas.org/contact/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.19411,
+          40.761147
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:615a2c1466",
+        "name": "Legal Aid Society of Suffolk County - Administrative Office",
+        "type": "legal",
+        "resource_group": "legal",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "320 Carleton Ave, Suite 2500, Central Islip, NY 11722",
+        "opening_time": "Call first",
+        "short_description": "Administrative office for Legal Aid Society of Suffolk County.",
+        "coordinate_note": "Administrative office location",
+        "verification_status": "Verified",
+        "source_url": "https://sclas.org/contact/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.196054,
+          40.766637
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:5d4a6a5990",
+        "name": "Economic Opportunity Council of Suffolk - Housing Services (Charles B. Randall Counseling Center)",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "320 Carleton Ave, Suite 7800, Central Islip, NY 11722",
+        "opening_time": "Call first",
+        "short_description": "HUD-approved housing counseling agency offering housing counseling, budget/credit counseling, and foreclosure prevention.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.dfs.ny.gov/consumers/homeowners/non-profit-housing-counselors ; https://eoc-suffolk.com/services/housing-services/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.196054,
+          40.766637
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:1cc1894903",
+        "name": "Housing Help Inc.",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "91 Broadway, Suite 10, Greenlawn, NY 11740",
+        "opening_time": "Call first",
+        "short_description": "HUD-certified housing counseling agency; provides rental listings, tenants' rights information, and referrals to free legal assistance.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.housinghelpinc.org/"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.364426,
+          40.866646
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:33396c946d",
+        "name": "North Fork Housing Alliance",
+        "type": "housing_support",
+        "resource_group": "housing_support",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "116 South St, Greenport, NY 11944",
+        "opening_time": "Call first",
+        "short_description": "Provides housing referral assistance, foreclosure/mortgage assistance, subsidized housing assistance, advocacy, and fair-housing support on the North Fork.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.nycourts.gov/LegacyPDFS/courts/10jd/suffolk/PDF/ResourceGuide.pdf"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.361181,
+          41.103446
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:b3665e0676",
+        "name": "Empire Justice Center - Long Island Office",
+        "type": "legal",
+        "resource_group": "legal",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "320 Carleton Avenue, Suites 4000 and 4100, Central Islip, NY 11722",
+        "opening_time": "Call first",
+        "short_description": "Listed as a Suffolk housing/eviction assistance resource; supports legal advocacy and housing-related assistance.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.ehamptonny.gov/DocumentCenter/View/26518/Suffolk-County-Housing-and-Eviction-Assistance-"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.196054,
+          40.766637
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:20b105d9eb",
+        "name": "Suffolk County Division of Community Mental Hygiene Services",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "725 Veterans Memorial Highway, Building C016, Hauppauge, NY 11788",
+        "opening_time": "Mon-Fri business hours",
+        "short_description": "County behavioral health division; directory source for prevention, treatment, harm reduction, recovery, and support services.",
+        "coordinate_note": "Administrative office location",
+        "verification_status": "Verified (administrative office)",
+        "source_url": "https://scnylegislature.us/DocumentCenter/View/84365/2024-Suffolk-County-Directory-of-Behavioral-Health-Services---Guide-to-Services-and-Supports-PDF"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.2157,
+          40.8202
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:a0757218ef",
+        "name": "WellLife Network - Coram",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "3600 Route 112, Coram, NY 11727",
+        "opening_time": "Mon-Fri 9am-4:30pm for food pantry; call for behavioral services",
+        "short_description": "Behavioral-health and social service provider also listed as a food pantry site.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://scnylegislature.us/DocumentCenter/View/84365/2024-Suffolk-County-Directory-of-Behavioral-Health-Services---Guide-to-Services-and-Supports-PDF"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.998452,
+          40.856794
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:80bb7a720e",
+        "name": "WellLife Network - Huntington",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "55 Horizon Drive, Huntington, NY 11743",
+        "opening_time": "Monday 11am-3pm for food pantry; call for behavioral services",
+        "short_description": "Behavioral-health and social service provider also listed as food assistance site.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://scnylegislature.us/DocumentCenter/View/84365/2024-Suffolk-County-Directory-of-Behavioral-Health-Services---Guide-to-Services-and-Supports-PDF"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.421898,
+          40.857206
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:729d547715",
+        "name": "THRIVE Recovery Community and Outreach Center",
+        "type": "outreach",
+        "resource_group": "outreach",
+        "is_access_resource": true,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "1324 Motor Pkwy, Suite 102, Hauppauge, NY 11749",
+        "opening_time": "Call first",
+        "short_description": "Recovery community/outreach support resource relevant to homelessness stabilization and long-term recovery.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://scnylegislature.us/DocumentCenter/View/84365/2024-Suffolk-County-Directory-of-Behavioral-Health-Services---Guide-to-Services-and-Supports-PDF"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.193853,
+          40.806816
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:2a8a18abae",
+        "name": "Family Service League - DASH Crisis Care Center",
+        "type": "behavioral_health",
+        "resource_group": "behavioral_health",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "90 Adams Ave, Hauppauge, NY 11788",
+        "opening_time": "24/7 for crisis care",
+        "short_description": "Crisis and addiction support location useful for resource-access mapping.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://scnylegislature.us/DocumentCenter/View/84365/2024-Suffolk-County-Directory-of-Behavioral-Health-Services---Guide-to-Services-and-Supports-PDF"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.256367,
+          40.818974
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:fc048568e9",
+        "name": "Suffolk Works Employment Program (SWEP)",
+        "type": "public_benefits",
+        "resource_group": "public_benefits",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "3085 Veterans Memorial Hwy, Ronkonkoma, NY 11779",
+        "opening_time": "Call first",
+        "short_description": "Employment-support program listed in Suffolk community resources; relevant to homelessness prevention and stabilization.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.135029,
+          40.788021
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:23988a8afb",
+        "name": "Suffolk County Department of Social Services - Coram Center",
+        "type": "public_benefits",
+        "resource_group": "public_benefits",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "80 Middle Country Rd, Coram, NY 11727",
+        "opening_time": "Call first",
+        "short_description": "DSS public assistance and SNAP access point; important for prevention and basic needs layer.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.983358,
+          40.873173
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "facility_id": "suffolk:8bf353be81",
+        "name": "Suffolk County Department of Social Services - Riverhead Center",
+        "type": "public_benefits",
+        "resource_group": "public_benefits",
+        "is_access_resource": false,
+        "capacity": null,
+        "county": "Suffolk",
+        "source": "suffolk_manual",
+        "address": "605 Old Country Rd, Riverhead, NY 11901",
+        "opening_time": "Call first",
+        "short_description": "DSS public assistance and SNAP access point; important for prevention and basic needs layer.",
+        "coordinate_note": "Verified physical service location",
+        "verification_status": "Verified",
+        "source_url": "https://www.stonybrookmedicine.edu/patientcare/community/resources-services ; https://www.suffolkcountyny.gov/Departments/Social-Services"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.6641,
+          40.934985
+        ]
+      }
+    }
+  ]
+}
