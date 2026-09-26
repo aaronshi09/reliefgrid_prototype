@@ -1,0 +1,15 @@
+{
+  "name": "reliefgrid",
+  "version": "2.0.0",
+  "private": true,
+  "description": "ReliefGrid — AI + geospatial intelligence for social-service accessibility on Long Island.",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/dev-server.mjs",
+    "start": "node server/dev-server.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}

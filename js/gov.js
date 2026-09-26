@@ -14,10 +14,12 @@ import {
   setMapLayer, setAvailabilityLayerVisibility, pushFacilitiesToMap, findFacilityFeature,
   availabilityHeadline, availabilitySecondaryLines, openLabel, statusChipHTML, demoPillHTML,
   percent, number, labelize, escapeHtml, cleanUrl, directionsUrl, haversineKm, featureCentroid,
-  resourceLegendIcon,
+  resourceLegendIcon, tractInsight, LISA_COLORS, LISA_LABELS, layerGradientCSS,
+  setSelectedTract, setSelectedFacility, setTractHighlight, setFacilityEmphasis, fitPadding, motion,
+  LONG_ISLAND_CENTER, LONG_ISLAND_ZOOM, setFacilitiesLayout, fitLongIsland, setUserLocationVisible, flyToPoint,
 } from './shared.js';
 
-export const GOV_MAP_PAGES = new Set(['gov-overview', 'gov-network', 'gov-gaps']);
+export const GOV_MAP_PAGES = new Set(['gov-overview', 'gov-ask', 'gov-network', 'gov-gaps']);
 export const GOV_CONTENT_PAGES = new Set(['gov-capacity', 'gov-provider', 'gov-methods']);
 export const GOV_PAGES = new Set([...GOV_MAP_PAGES, ...GOV_CONTENT_PAGES]);
 
@@ -26,7 +28,7 @@ let networkCategoryFilters = new Set(Object.keys(RESOURCE_COLORS));
 let networkAvailFilters = new Set();
 let showAvailBadges = true;
 let govDetailId = null;
-let gapsLayer = 'mismatch_index';
+let gapsLayer = 'lisa'; // matches the radio checked in index.html
 let charts = {};
 let providerSelectPopulated = false;
 
@@ -37,6 +39,8 @@ const AVAIL_FILTERS = {
 };
 
 export function initGov() {
+  applyChartTheme();
+  wireAskControls();
   wireOverviewControls();
   wireNetworkControls();
   wireGapsControls();
@@ -49,6 +53,11 @@ export function initGov() {
 export function navigateGov(page) {
   govPage = page;
   closeGovDetail();
+  // AI highlights belong to Ask ReliefGrid; the analyst re-applies them on return.
+  if (page !== 'gov-ask') { setTractHighlight([]); setFacilityEmphasis([]); }
+  setSelectedTract(null);
+  setSelectedFacility(null);
+  setUserLocationVisible(false);
   document.querySelectorAll('#side-panel > .side-panel-page').forEach(p => p.classList.add('hidden'));
   document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
 
@@ -69,19 +78,36 @@ function configureMapForGovPage(page) {
   setAvailabilityLayerVisibility(false);
   map.setLayoutProperty('districts-fill', 'visibility', 'none');
   map.setLayoutProperty('districts-stroke', 'visibility', 'none');
+  // The seeker shell narrows the facility layers to its result set; the
+  // dashboard always starts from the full network.
+  if (page !== 'gov-network') setFacilityFilter(null);
+  let pitch = 0;
 
+  if (page === 'gov-ask') {
+    // Analyst view: research layer in front, resources available on demand.
+    // The layer / travel mode may be changed by the analyst (js/ai/analyst.js).
+    const layer = document.querySelector('input[name="gov-ask-layer"]:checked')?.value || 'lisa';
+    setMapLayer(layer);
+    map.setPaintProperty('tract-fill', 'fill-opacity', 0.62);
+    setFacilitiesLayout($('gov-ask-facilities-toggle')?.checked ? 'visible' : 'none');
+    renderAskLegend();
+    pitch = $('gov-ask-tilt')?.checked ? 32 : 0;
+    document.dispatchEvent(new CustomEvent('rg:gov-ask-shown'));
+    fitLongIsland({ pitch, duration: 500 });
+    return;
+  }
   if (page === 'gov-overview') {
     const layer = document.querySelector('input[name="gov-overview-layer"]:checked')?.value || 'mismatch_index';
     setMapLayer(layer === 'none' ? 'lisa' : layer);
-    map.setPaintProperty('tract-fill', 'fill-opacity', layer === 'none' ? 0.12 : 0.65);
-    map.setLayoutProperty('facilities', 'visibility', $('gov-overview-facilities-toggle')?.checked ? 'visible' : 'none');
+    map.setPaintProperty('tract-fill', 'fill-opacity', layer === 'none' ? 0.12 : 0.6);
+    setFacilitiesLayout($('gov-overview-facilities-toggle')?.checked ? 'visible' : 'none');
     setAvailabilityLayerVisibility(!!$('gov-overview-avail-toggle')?.checked);
     renderOverviewTiles();
     renderOverviewLegend();
   } else if (page === 'gov-network') {
     setMapLayer('lisa');
     map.setPaintProperty('tract-fill', 'fill-opacity', 0.12);
-    map.setLayoutProperty('facilities', 'visibility', 'visible');
+    setFacilitiesLayout('visible');
     setAvailabilityLayerVisibility(showAvailBadges);
     applyNetworkFilter();
     renderNetworkCategoryFilters();
@@ -90,17 +116,70 @@ function configureMapForGovPage(page) {
     renderNetworkCounts();
   } else if (page === 'gov-gaps') {
     setMapLayer(gapsLayer);
-    map.setPaintProperty('tract-fill', 'fill-opacity', 0.72);
-    map.setLayoutProperty('facilities', 'visibility', $('gov-gaps-facilities-toggle')?.checked ? 'visible' : 'none');
+    map.setPaintProperty('tract-fill', 'fill-opacity', 0.62);
+    setFacilitiesLayout($('gov-gaps-facilities-toggle')?.checked ? 'visible' : 'none');
     renderGapsLegend();
+    pitch = $('gov-gaps-tilt')?.checked ? 32 : 0;
   }
-  map.easeTo({ center: [-73.05, 40.84], zoom: 8.9, duration: 500 });
+  fitLongIsland({ pitch, duration: 500 });
+}
+export function setFacilityFilter(filter) {
+  const map = AppState.map; if (!map) return;
+  ['facilities', 'facilities-halo', 'facilities-status-bg', 'facilities-status-label'].forEach(id => {
+    if (!map.getLayer(id)) return;
+    if (id === 'facilities' || id === 'facilities-halo') map.setFilter(id, filter);
+    else { const base = ['==', ['get', 'avail_has_data'], true]; map.setFilter(id, filter ? ['all', base, filter] : base); }
+  });
+}
+/** Modest, optional tilt for analytical views (never on consumer maps). */
+function setTilt(on) { AppState.map?.easeTo({ pitch: on ? 32 : 0, duration: motion(400) }); }
+
+/* ── Ask ReliefGrid (analyst page chrome; the AI lives in js/ai/analyst.js) ── */
+function wireAskControls() {
+  document.querySelectorAll('input[name="gov-ask-layer"]').forEach(r => r.addEventListener('change', () => { setMapLayer(r.value); renderAskLegend(); }));
+  $('gov-ask-facilities-toggle')?.addEventListener('change', e => { setFacilityFilter(null); setFacilitiesLayout(e.target.checked ? 'visible' : 'none'); });
+  $('gov-ask-tilt')?.addEventListener('change', e => setTilt(e.target.checked));
+  document.querySelectorAll('#gov-ask-mode-switch button').forEach(btn => btn.addEventListener('click', () => setTravelMode(btn.dataset.mode)));
+}
+export function renderAskLegend() {
+  const el = $('gov-ask-legend'); if (!el) return;
+  const layer = document.querySelector('input[name="gov-ask-layer"]:checked')?.value || 'lisa';
+  el.innerHTML = layerLegendHTML(layer);
+}
+/** Programmatic layer switch used by the analyst when a finding needs a specific layer. */
+export function setAskLayer(layer) {
+  const input = document.querySelector(`input[name="gov-ask-layer"][value="${layer}"]`); if (!input) return;
+  input.checked = true; setMapLayer(layer); renderAskLegend();
+}
+/** Switch drive/walk research layers everywhere (Service Gaps + Ask share AppState.mode). */
+export function setTravelMode(mode) {
+  if (mode !== 'drive' && mode !== 'walk') return;
+  AppState.mode = mode;
+  document.querySelectorAll('#gov-gaps-mode-switch button, #gov-ask-mode-switch button').forEach(b => {
+    const on = b.dataset.mode === mode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+  });
+  AppState.map?.getSource('tracts')?.setData(AppState.tractsData[AppState.mode]);
+  renderGapsLegend(); renderAskLegend();
+  document.dispatchEvent(new CustomEvent('rg:travel-mode', { detail: { mode } }));
+}
+function layerLegendHTML(layer) {
+  if (layer === 'lisa') {
+    const counts = AppState.diagnostics[AppState.mode]?.lisa_counts?.mismatch_index || {};
+    return `<div class="legend-title">Service Gap Clusters <span class="muted">· ${AppState.mode === 'walk' ? 'walk' : 'drive'} catchments</span></div>` +
+      ['HH', 'LL', 'HL', 'LH', 'ns'].map(k => `<div class="legend-row"><span class="swatch swatch-${k}" style="background:${LISA_COLORS[k]}"></span><span><strong>${k}</strong> <span class="muted">${escapeHtml(LISA_LABELS[k])}</span></span><span class="legend-count">${counts[k] ?? 0}</span></div>`).join('');
+  }
+  const [lo, mid, hi] = layer === 'access_index' ? [0, 50, 100] : [-2, 0, 2];
+  const ends = layer === 'access_index' ? ['Lower access', 'Higher access'] : layer === 'need_score' ? ['Lower need', 'Higher need'] : ['Access exceeds need', 'Need exceeds access'];
+  return `<div class="legend-title">${escapeHtml(LAYER_LABELS[layer] || layer)}</div>
+    <div class="gradient" style="background:${layerGradientCSS(layer)}"></div>
+    <div class="gradient-labels"><span>${lo}</span><span>${mid}</span><span>${hi}</span></div>
+    <div class="gradient-labels gradient-ends"><span>${ends[0]}</span><span>${ends[1]}</span></div>`;
 }
 
 /* ── Overview ─────────────────────────────────────────────────────────── */
 function wireOverviewControls() {
   document.querySelectorAll('input[name="gov-overview-layer"]').forEach(r => r.addEventListener('change', () => configureMapForGovPage('gov-overview')));
-  $('gov-overview-facilities-toggle')?.addEventListener('change', e => AppState.map?.setLayoutProperty('facilities', 'visibility', e.target.checked ? 'visible' : 'none'));
+  $('gov-overview-facilities-toggle')?.addEventListener('change', e => setFacilitiesLayout(e.target.checked ? 'visible' : 'none'));
   $('gov-overview-avail-toggle')?.addEventListener('change', e => setAvailabilityLayerVisibility(e.target.checked));
   document.querySelectorAll('#panel-gov-overview .info-toggle').forEach(wireInfoToggle);
 }
@@ -138,9 +217,7 @@ function renderOverviewLegend() {
   const el = $('gov-overview-legend'); if (!el) return;
   const layer = document.querySelector('input[name="gov-overview-layer"]:checked')?.value || 'mismatch_index';
   if (layer === 'none') { el.innerHTML = '<div class="muted small">Showing resource locations only.</div>'; return; }
-  const [lo, mid, hi] = layer === 'access_index' ? [0, 50, 100] : [-2, 0, 2];
-  el.innerHTML = `<div class="legend-row"><span>${escapeHtml(LAYER_LABELS[layer] || layer)}</span></div>
-    <div class="gradient"></div><div class="gradient-labels"><span>${lo}</span><span>${mid}</span><span>${hi}</span></div>`;
+  el.innerHTML = layerLegendHTML(layer);
 }
 
 /* ── Resource Network (old "resource map") ───────────────────────────── */
@@ -209,11 +286,7 @@ function applyNetworkFilter() {
   };
   networkAvailFilters.forEach(k => { if (predicates[k]) clauses.push(predicates[k]); });
   const filter = clauses.length === 0 ? null : clauses.length === 1 ? clauses[0] : ['all', ...clauses];
-  ['facilities', 'facilities-status-bg', 'facilities-status-label'].forEach(id => {
-    if (!map.getLayer(id)) return;
-    if (id === 'facilities') map.setFilter(id, filter);
-    else { const base = ['==', ['get', 'avail_has_data'], true]; map.setFilter(id, filter ? ['all', base, filter] : base); }
-  });
+  setFacilityFilter(filter);
 }
 function handleNetworkSearch(q) {
   const resultsEl = $('gov-network-search-results'); const lower = q.toLowerCase();
@@ -229,7 +302,6 @@ function handleNetworkSearch(q) {
   resultsEl.classList.remove('hidden');
   resultsEl.querySelectorAll('.search-result-item').forEach(btn => btn.addEventListener('click', () => {
     const f = matches[parseInt(btn.dataset.i)];
-    AppState.map.flyTo({ center: f.geometry.coordinates, zoom: 13, duration: 800 });
     openGovDetail(f.properties.facility_id);
     resultsEl.classList.add('hidden');
   }));
@@ -240,10 +312,14 @@ export function openGovDetail(facilityId) {
   const feat = findFacilityFeature(facilityId); if (!feat) return;
   govDetailId = facilityId;
   $('gov-resource-detail')?.classList.remove('hidden');
+  setSelectedFacility(facilityId);
   refreshGovDetail();
-  if (AppState.map) AppState.map.flyTo({ center: feat.geometry.coordinates, zoom: Math.max(AppState.map.getZoom(), 12.5), duration: 650 });
+  flyToPoint(feat.geometry.coordinates, 12.5);
 }
-function closeGovDetail() { govDetailId = null; $('gov-resource-detail')?.classList.add('hidden'); }
+function closeGovDetail() {
+  if (govDetailId) setSelectedFacility(null);
+  govDetailId = null; $('gov-resource-detail')?.classList.add('hidden');
+}
 function refreshGovDetail() {
   if (!govDetailId) return;
   const feat = findFacilityFeature(govDetailId); const body = $('gov-resource-detail-body');
@@ -299,47 +375,38 @@ function wireGapsControls() {
   document.querySelectorAll('input[name="gov-gaps-layer"]').forEach(r => r.addEventListener('change', e => {
     gapsLayer = e.target.value; setMapLayer(gapsLayer); renderGapsLegend();
   }));
-  $('gov-gaps-facilities-toggle')?.addEventListener('change', e => AppState.map?.setLayoutProperty('facilities', 'visibility', e.target.checked ? 'visible' : 'none'));
+  $('gov-gaps-facilities-toggle')?.addEventListener('change', e => setFacilitiesLayout(e.target.checked ? 'visible' : 'none'));
+  $('gov-gaps-tilt')?.addEventListener('change', e => setTilt(e.target.checked));
   document.querySelectorAll('#gov-gaps-mode-switch button').forEach(btn => btn.addEventListener('click', () => {
     if (btn.classList.contains('active')) return;
-    AppState.mode = btn.dataset.mode;
-    document.querySelectorAll('#gov-gaps-mode-switch button').forEach(b => b.classList.toggle('active', b === btn));
-    AppState.map.getSource('tracts').setData(AppState.tractsData[AppState.mode]);
-    renderGapsLegend();
+    setTravelMode(btn.dataset.mode);
   }));
   document.querySelectorAll('#panel-gov-gaps .info-toggle').forEach(wireInfoToggle);
-  AppState.map?.on('click', 'tract-fill', (e) => { if (govPage === 'gov-gaps' && AppState.shell === 'gov') showGapsDetail(e.features[0]); });
+  AppState.map?.on('click', 'tract-fill', (e) => {
+    if (AppState.shell !== 'gov') return;
+    const feat = e.features[0];
+    if (govPage === 'gov-gaps') showGapsDetail(feat);
+    else if (govPage === 'gov-ask') { setSelectedTract(feat.properties.GEOID); document.dispatchEvent(new CustomEvent('rg:tract-click', { detail: { geoid: feat.properties.GEOID } })); }
+  });
   AppState.map?.on('mousemove', 'tract-fill', (e) => { AppState.map.setFilter('tract-hover', ['==', 'GEOID', e.features[0].properties.GEOID]); AppState.map.getCanvas().style.cursor = 'pointer'; });
   AppState.map?.on('mouseleave', 'tract-fill', () => { AppState.map.setFilter('tract-hover', ['==', 'GEOID', '']); AppState.map.getCanvas().style.cursor = ''; });
 }
 function renderGapsLegend() {
   const el = $('gov-gaps-legend'); if (!el) return;
-  if (gapsLayer === 'lisa') {
-    const counts = AppState.diagnostics[AppState.mode]?.lisa_counts?.mismatch_index || {};
-    el.innerHTML = [['HH', 'High need / low access'], ['LL', 'Low need / high access'], ['HL', 'Isolated high-need'], ['LH', 'Isolated low-need'], ['ns', 'Not significant']]
-      .map(([k, label]) => `<div class="legend-row"><span class="swatch" style="background:${{HH:'#d7191c',LL:'#2c7bb6',HL:'#fdae61',LH:'#abd9e9',ns:'#e0e0e0'}[k]}"></span><span>${k} <span class="muted">${label}</span></span><span class="muted" style="margin-left:auto">${counts[k] ?? 0}</span></div>`).join('');
-  } else {
-    const [lo, mid, hi] = gapsLayer === 'access_index' ? [0, 50, 100] : [-2, 0, 2];
-    el.innerHTML = `<div class="legend-row"><span>${escapeHtml(LAYER_LABELS[gapsLayer] || gapsLayer)}</span></div><div class="gradient"></div><div class="gradient-labels"><span>${lo}</span><span>${mid}</span><span>${hi}</span></div>`;
-  }
-}
-function tractInsight(p) {
-  const lisa = p.lisa_mismatch_index_label || 'ns';
-  if (lisa === 'HH') return { tag: 'Priority for review', tagClass: 'gap-tag-hh', headline: 'High need, low access',
-    body: 'This area has relatively high housing-instability risk but comparatively limited access to homelessness-related services — and sits inside a broader cluster of similarly underserved neighborhoods, not an isolated data point.', action: 'Area for further service-planning review' };
-  if (lisa === 'LL') return { tag: 'Currently well-served', tagClass: 'gap-tag-ll', headline: 'Lower need, strong access',
-    body: 'This area has comparatively lower housing-instability risk and relatively strong access to nearby services, inside a cluster of similarly well-served neighborhoods.', action: null };
-  if (lisa === 'HL') return { tag: 'Isolated high-need tract', tagClass: 'gap-tag-hl', headline: 'High need, but neighbors are not',
-    body: 'This tract shows high housing-instability risk while its immediate neighbors do not — worth a closer look to confirm the pattern holds before treating it as a cluster.', action: null };
-  if (lisa === 'LH') return { tag: 'Contextual', tagClass: 'gap-tag-lh', headline: 'Lower need, surrounded by higher-need areas',
-    body: 'This tract itself shows lower measured need but sits among higher-need neighbors — access here may still matter to the surrounding area.', action: null };
-  const needHigh = +p.need_score > 0, accessLow = +p.access_index < 50;
-  return { tag: 'Not a significant cluster', tagClass: 'gap-tag-ns',
-    headline: needHigh && accessLow ? 'Above-average need, below-average access' : needHigh ? 'Above-average need' : accessLow ? 'Below-average access' : 'Near typical need and access',
-    body: 'This tract does not fall inside a statistically significant need/access cluster — read this pattern with more caution than the highlighted cluster areas.', action: null };
+  el.innerHTML = layerLegendHTML(gapsLayer);
 }
 function showGapsDetail(feat) {
-  const p = feat.properties; const el = $('gov-gaps-detail-body'); if (!el) return;
+  const el = $('gov-gaps-detail-body'); if (!el) return;
+  setSelectedTract(feat.properties.GEOID);
+  renderTractDetail(feat, el, { idPrefix: 'gaps', askButton: true });
+}
+/**
+ * Plain-language + metric read-out for one tract, rendered into `el`. Shared
+ * by Service Gaps and Ask ReliefGrid so both show identical, data-sourced
+ * values (never AI-generated numbers).
+ */
+export function renderTractDetail(feat, el, { idPrefix = 'gaps', askButton = false } = {}) {
+  const p = feat.properties;
   const insight = tractInsight(p);
   const center = featureCentroid(feat);
   const nearest = center ? (AppState.facilitiesData?.features || [])
@@ -350,15 +417,22 @@ function showGapsDetail(feat) {
     <p class="tract-lisa-long"><strong>${escapeHtml(insight.headline)}.</strong> ${escapeHtml(insight.body)}</p>
     ${insight.action ? `<div class="insight-card">${escapeHtml(insight.action)}</div>` : ''}
     <table>
-      <tr><td>Community Need ${infoToggle('need', 'Community Need', 'A composite of poverty rate, rent burden, and renter share for this census tract, standardized so 0 is the regional average.')}</td><td>${number(p.need_score)}</td></tr>
-      <tr><td>Service Access ${infoToggle('access', 'Service Access', 'Percentile rank (0–100) of resources reachable within a 15-minute catchment, weighted by competing household demand (E2SFCA method).')}</td><td>${number(p.access_index, 0)} / 100</td></tr>
-      <tr><td>Service Gap ${infoToggle('gap', 'Service Gap', 'Community Need minus Service Access, both standardized. Positive = need exceeds access.')}</td><td>${number(p.mismatch_index)}</td></tr>
+      <tr><td>Community Need ${infoToggle(`${idPrefix}-need`, 'Community Need', 'A composite of poverty rate, rent burden, and renter share for this census tract, standardized so 0 is the regional average.')}</td><td>${number(p.need_score)}</td></tr>
+      <tr><td>Service Access ${infoToggle(`${idPrefix}-access`, 'Service Access', 'Percentile rank (0–100) of resources reachable within a 15-minute catchment, weighted by competing household demand (E2SFCA method).')}</td><td>${number(p.access_index, 0)} / 100</td></tr>
+      <tr><td>Service Gap ${infoToggle(`${idPrefix}-gap`, 'Service Gap', 'Community Need minus Service Access, both standardized. Positive = need exceeds access.')}</td><td>${number(p.mismatch_index)}</td></tr>
     </table>
-    ${nearest.length ? `<h4 style="font-size:12px;font-weight:600;margin:10px 0 6px">Nearest resources</h4>${nearest.map(r => `<div class="nearest-row">${resourceLegendIcon(r.p.resource_group)}<span>${escapeHtml(r.p.name || '(unnamed)')} <span class="muted">${r.d.toFixed(1)} km</span></span></div>`).join('')}` : ''}`;
-  document.querySelectorAll('#gov-gaps-detail-body .info-toggle').forEach(wireInfoToggle);
+    <div class="muted small tract-mode-note">${AppState.mode === 'walk' ? 'Walking' : 'Driving'} catchments</div>
+    ${nearest.length ? `<h4 class="nearest-title">Nearest resources <span class="muted">(straight-line)</span></h4>${nearest.map(r => `<div class="nearest-row">${resourceLegendIcon(r.p.resource_group)}<span>${escapeHtml(r.p.name || '(unnamed)')} <span class="muted">${r.d.toFixed(1)} km</span></span></div>`).join('')}` : ''}
+    ${askButton ? `<button type="button" class="btn btn-ai btn-sm tract-ask-btn" data-ask-tract="${escapeHtml(p.GEOID)}"><span class="ai-spark" aria-hidden="true"></span>Ask ReliefGrid about this area</button>` : ''}`;
+  el.querySelectorAll('.info-toggle').forEach(wireInfoToggle);
+  el.querySelector('[data-ask-tract]')?.addEventListener('click', (e) => {
+    const geoid = e.currentTarget.dataset.askTract;
+    window.__reliefgrid_navigate('gov-ask');
+    document.dispatchEvent(new CustomEvent('rg:ask-about-tract', { detail: { geoid } }));
+  });
 }
 function infoToggle(id, title, text) {
-  return `<button type="button" class="info-toggle" data-info="gaps-${id}" aria-expanded="false"><span aria-hidden="true">ⓘ</span></button><span class="info-panel hidden" id="info-gaps-${id}" role="note">${escapeHtml(text)}</span>`;
+  return `<button type="button" class="info-toggle" data-info="gaps-${id}" aria-expanded="false" aria-label="What is ${escapeHtml(title)}?"><span aria-hidden="true">ⓘ</span></button><span class="info-panel hidden" id="info-gaps-${id}" role="note">${escapeHtml(text)}</span>`;
 }
 function wireInfoToggle(btn) {
   btn.addEventListener('click', () => {
@@ -425,7 +499,7 @@ function renderCapacity() {
 
   const counties = ['Nassau', 'Suffolk'];
   makeChart('capShelter', 'chart-gov-shelter', { type: 'bar',
-    data: { labels: counties, datasets: [{ label: 'Available', data: counties.map(c => m.beds[c].avail), backgroundColor: STATUS.available.color }, { label: 'Occupied', data: counties.map(c => Math.max(0, m.beds[c].total - m.beds[c].avail)), backgroundColor: '#b45f06' }] },
+    data: { labels: counties, datasets: [{ label: 'Available', data: counties.map(c => m.beds[c].avail), backgroundColor: STATUS.available.color }, { label: 'Occupied', data: counties.map(c => Math.max(0, m.beds[c].total - m.beds[c].avail)), backgroundColor: '#f2a65a' }] },
     options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } } });
 
   const gap = availabilityGapAnalysis();
@@ -435,10 +509,20 @@ function renderCapacity() {
     headline.innerHTML = `<strong>${share}% of the highest-need neighborhoods (${gap.noneNearby} of ${gap.totalHigh} census tracts)</strong> currently have <strong>no resource showing availability</strong> within about a 15-minute drive. ${demoPillHTML()}`;
   }
   if (gap) makeChart('capGap', 'chart-gov-gap', { type: 'bar',
-    data: { labels: ['0 available', '1', '2', '3 or more'], datasets: [{ label: 'High-need tracts', data: [gap.buckets['0'], gap.buckets['1'], gap.buckets['2'], gap.buckets['3+']], backgroundColor: ['#b91c1c', '#d97706', '#f6c453', '#1a7f37'], borderRadius: 3 }] },
+    data: { labels: ['0 available', '1', '2', '3 or more'], datasets: [{ label: 'High-need tracts', data: [gap.buckets['0'], gap.buckets['1'], gap.buckets['2'], gap.buckets['3+']], backgroundColor: ['#f0645a', '#f2a65a', '#e8cf6a', '#3ecf7a'], borderRadius: 4 }] },
     options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Resources showing availability within ~15-min drive' } }, y: { beginAtZero: true, ticks: { precision: 0 } } } } });
   if (gap && listEl) listEl.innerHTML = gap.worst.length ? `<div class="section-label" style="margin-top:14px">Highest-need tracts with no available resource nearby</div>
     <table class="gap-table"><thead><tr><th>Census tract</th><th>County</th><th>Need score</th></tr></thead><tbody>${gap.worst.map(w => `<tr><td>${escapeHtml(w.geoid || '—')}</td><td>${escapeHtml(w.county || '—')}</td><td>${w.need.toFixed(2)}</td></tr>`).join('')}</tbody></table>` : '';
+}
+function applyChartTheme() {
+  if (!window.Chart) return;
+  const d = window.Chart.defaults;
+  d.color = '#9aa9c2';
+  d.borderColor = 'rgba(148,170,210,0.12)';
+  d.font.family = getComputedStyle(document.body).fontFamily;
+  d.font.size = 11;
+  d.animation = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 300 };
+  if (d.plugins?.tooltip) { d.plugins.tooltip.backgroundColor = 'rgba(8,14,26,0.95)'; d.plugins.tooltip.borderColor = 'rgba(120,160,220,0.25)'; d.plugins.tooltip.borderWidth = 1; }
 }
 function makeChart(key, canvasId, config) {
   const el = document.getElementById(canvasId); if (!el || !window.Chart) return;

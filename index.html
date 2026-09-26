@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ReliefGrid — Find help. Understand need. Close the gap.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#060b15" />
+  <meta name="description" content="ReliefGrid combines verified social-service data, geospatial accessibility analysis and grounded AI to help people find help and help communities close service gaps on Long Island." />
+  <!-- Leave empty when the AI backend (api/) is served from the same origin.
+       Set to e.g. "https://reliefgrid-api.example.com" when the static site is
+       hosted separately. See README → Deploying. -->
+  <meta name="reliefgrid-api-base" content="" />
+  <title>ReliefGrid — AI + geospatial intelligence for social-service access</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 28 28%22%3E%3Crect x=%221%22 y=%221%22 width=%2226%22 height=%2226%22 rx=%228%22 fill=%22%23060b15%22 stroke=%22%235cc8ff%22 stroke-opacity=%22.5%22/%3E%3Ccircle cx=%2218.5%22 cy=%229.5%22 r=%223%22 fill=%22%235cc8ff%22/%3E%3Ccircle cx=%229.5%22 cy=%2218.5%22 r=%222%22 fill=%22%23cfe2ff%22/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
   <link rel="stylesheet" href="./style.css" />
   <script type="importmap">
@@ -11,36 +19,48 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-<body>
+<body class="is-loading" data-shell="landing">
+  <a class="skip-link" href="#content-pages">Skip to content</a>
 
   <!-- ── TOP NAVIGATION ──────────────────────────────────────────────── -->
-  <nav id="top-nav">
-    <button class="nav-brand" id="nav-brand" aria-label="ReliefGrid home">
+  <header id="top-nav">
+    <button type="button" class="nav-brand" id="nav-brand" aria-label="ReliefGrid home">
+      <svg class="brand-glyph" viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="1" y="1" width="26" height="26" rx="8" fill="none" stroke="currentColor" stroke-opacity=".35"/>
+        <path d="M7 9.5h14M7 14h14M7 18.5h14M9.5 7v14M14 7v14M18.5 7v14" stroke="currentColor" stroke-opacity=".22" stroke-width="1"/>
+        <circle cx="18.5" cy="9.5" r="2.6" fill="#5cc8ff"/>
+        <circle cx="9.5" cy="18.5" r="1.7" fill="currentColor" fill-opacity=".8"/>
+      </svg>
       <span class="brand-mark">ReliefGrid</span>
     </button>
-    <div class="nav-tabs" id="nav-tabs"></div>
-    <div class="nav-shell-switch hidden" id="nav-shell-switch"></div>
-  </nav>
+    <nav class="nav-mode-switch" id="nav-mode-switch" aria-label="Choose experience">
+      <button type="button" data-shell="seeker" aria-pressed="false">Find Resources</button>
+      <button type="button" data-shell="gov" aria-pressed="false">Analyze Service Gaps</button>
+    </nav>
+    <nav class="nav-tabs" id="nav-tabs" aria-label="Section"></nav>
+  </header>
 
   <!-- ── APP ────────────────────────────────────────────────────────── -->
   <div id="app">
 
-    <div id="map-area"><div id="map"></div></div>
+    <div id="map-area"><div id="map" role="region" aria-label="Map of Long Island services and service-access analysis"></div></div>
 
-    <!-- ── SIDE PANEL (map-page panels: seeker results + gov map pages) ─ -->
+    <!-- ── SIDE PANEL (floating glass panel on desktop, bottom sheet on mobile) ─ -->
     <div id="side-panel" class="hidden">
+      <button type="button" id="sheet-toggle" class="sheet-toggle" aria-expanded="true" aria-label="Collapse panel to show the map"><span class="sheet-grip" aria-hidden="true"></span></button>
 
-      <aside id="panel-seeker-results" class="side-panel-page hidden">
+      <aside id="panel-seeker-results" class="side-panel-page hidden" aria-labelledby="seeker-results-heading">
         <div class="sr-header">
           <div>
             <h2 id="seeker-results-heading">Results</h2>
             <div id="seeker-results-sub" class="muted small"></div>
           </div>
-          <div class="seeker-view-toggle" id="seeker-results-view-toggle">
-            <button type="button" data-view="list" id="seeker-results-view-list" class="active">List</button>
-            <button type="button" data-view="map" id="seeker-results-view-map">Map</button>
+          <div class="seeker-view-toggle" id="seeker-results-view-toggle" role="group" aria-label="Results view">
+            <button type="button" data-view="list" id="seeker-results-view-list" class="active" aria-pressed="true">List</button>
+            <button type="button" data-view="map" id="seeker-results-view-map" aria-pressed="false">Map</button>
           </div>
         </div>
+        <div id="seeker-ai-context" class="ai-context" hidden></div>
         <div id="seeker-results-list" class="seeker-results-list"></div>
       </aside>
 
@@ -48,7 +68,7 @@
         <div class="side-panel-header"><div class="side-panel-kicker">Overview</div><h2>System snapshot</h2></div>
         <div class="side-panel-body">
           <div id="gov-overview-tiles" class="metric-tiles-compact"></div>
-          <div class="section-label" style="margin-top:14px">Map layer</div>
+          <div class="section-label" style="margin-top:16px">Map layer</div>
           <div class="layer-group">
             <label class="layer-radio-label"><input type="radio" name="gov-overview-layer" value="mismatch_index" checked><span>Service Gap</span><span class="layer-hint">Where need is high and access is comparatively low</span></label>
             <label class="layer-radio-label"><input type="radio" name="gov-overview-layer" value="need_score"><span>Community Need</span><span class="layer-hint">Poverty, rent burden, renter share composite</span></label>
@@ -57,7 +77,44 @@
           </div>
           <label class="layer-check-label"><input type="checkbox" id="gov-overview-facilities-toggle" checked> Show resource locations</label>
           <label class="layer-check-label"><input type="checkbox" id="gov-overview-avail-toggle" checked> Show availability status <span class="demo-pill">Demo</span></label>
-          <div id="gov-overview-legend" class="legend-section" style="margin-top:10px"></div>
+          <div id="gov-overview-legend" class="legend-section" style="margin-top:12px"></div>
+          <button type="button" class="ask-cta" data-goto="gov-ask"><span class="ai-spark" aria-hidden="true"></span><span><strong>Ask ReliefGrid about this data</strong><span>AI-assisted analysis grounded in these layers</span></span></button>
+        </div>
+      </aside>
+
+      <aside id="panel-gov-ask" class="side-panel-page hidden" aria-labelledby="gov-ask-title">
+        <div class="side-panel-header">
+          <div class="side-panel-kicker ai-kicker"><span class="ai-spark" aria-hidden="true"></span>AI-assisted analysis</div>
+          <div class="ask-title-row"><h2 id="gov-ask-title">Ask ReliefGrid</h2><button type="button" class="link-btn" id="analyst-clear" hidden>Clear</button></div>
+          <p class="ask-sub">Answers are generated only from ReliefGrid’s precomputed tract, cluster and resource data — never from general knowledge.</p>
+        </div>
+        <div class="side-panel-body ask-body">
+          <form id="analyst-form" class="ai-input-shell ai-input-analyst" autocomplete="off">
+            <label for="analyst-input" class="sr-only">Ask ReliefGrid about this data</label>
+            <textarea id="analyst-input" rows="2" maxlength="500" placeholder="Ask ReliefGrid about this data…"></textarea>
+            <button type="submit" class="btn btn-ai" id="analyst-submit"><span class="btn-label">Ask</span></button>
+          </form>
+          <div id="analyst-setup"></div>
+          <div id="analyst-context" class="analyst-context"></div>
+          <div id="analyst-suggestions" class="ai-suggestions" aria-label="Suggested questions"></div>
+          <div id="analyst-thread" class="analyst-thread" aria-live="polite"></div>
+          <div id="analyst-tract-detail" class="sidebar-tract-detail ask-tract" hidden></div>
+
+          <details class="ask-map-controls" open>
+            <summary>Map layers</summary>
+            <div class="layer-group layer-chips" role="radiogroup" aria-label="Research layer">
+              <label class="layer-chip"><input type="radio" name="gov-ask-layer" value="lisa" checked><span>Gap clusters</span></label>
+              <label class="layer-chip"><input type="radio" name="gov-ask-layer" value="mismatch_index"><span>Service gap</span></label>
+              <label class="layer-chip"><input type="radio" name="gov-ask-layer" value="need_score"><span>Need</span></label>
+              <label class="layer-chip"><input type="radio" name="gov-ask-layer" value="access_index"><span>Access</span></label>
+            </div>
+            <div class="ask-controls-row">
+              <div class="mode-switch" id="gov-ask-mode-switch" role="group" aria-label="Travel mode"><button type="button" data-mode="drive" class="active" aria-pressed="true">Drive</button><button type="button" data-mode="walk" aria-pressed="false">Walk</button></div>
+              <label class="layer-check-label"><input type="checkbox" id="gov-ask-facilities-toggle"> Resources</label>
+              <label class="layer-check-label"><input type="checkbox" id="gov-ask-tilt"> Tilt</label>
+            </div>
+            <div id="gov-ask-legend" class="legend-section"></div>
+          </details>
         </div>
       </aside>
 
@@ -65,16 +122,16 @@
         <div class="side-panel-header"><div class="side-panel-kicker">Resource Network</div><h2>All mapped resources</h2></div>
         <div class="side-panel-body">
           <div class="search-section">
-            <div class="search-row"><input type="text" id="gov-network-search" placeholder="Name, category, address…" autocomplete="off" /><button id="gov-network-search-clear" class="search-clear" aria-label="Clear search" style="display:none">&times;</button></div>
+            <div class="search-row"><label for="gov-network-search" class="sr-only">Search resources</label><input type="text" id="gov-network-search" placeholder="Name, category, address…" autocomplete="off" /><button id="gov-network-search-clear" class="search-clear" aria-label="Clear search" style="display:none">&times;</button></div>
             <div id="gov-network-search-results" class="search-results hidden"></div>
           </div>
-          <div class="section-label" style="margin-top:12px">Live availability <span class="demo-pill">Demo</span></div>
+          <div class="section-label" style="margin-top:14px">Live availability <span class="demo-pill">Demo</span></div>
           <label class="layer-check-label"><input type="checkbox" id="gov-network-avail-toggle" checked> Show availability badges on map</label>
           <div id="gov-network-avail-filters" style="margin-top:6px"></div>
           <div id="gov-network-avail-legend" class="legend-section" style="margin-top:10px"></div>
-          <div class="section-label" style="margin-top:12px">Filter by category</div>
+          <div class="section-label" style="margin-top:14px">Filter by category</div>
           <div id="gov-network-filter-list"></div>
-          <div id="gov-network-counts" style="margin-top:10px"></div>
+          <div id="gov-network-counts" style="margin-top:12px"></div>
         </div>
       </aside>
 
@@ -90,9 +147,10 @@
             <label class="layer-radio-label"><input type="radio" name="gov-gaps-layer" value="access_index"><span>Service Access</span><span class="layer-hint">Resources reachable within 15 minutes</span></label>
           </div>
           <label class="layer-check-label" style="margin-top:6px"><input type="checkbox" id="gov-gaps-facilities-toggle"> Show resource locations</label>
-          <div class="section-label" style="margin-top:10px">Travel mode</div>
-          <div class="mode-switch" id="gov-gaps-mode-switch"><button data-mode="drive" class="active">Drive</button><button data-mode="walk">Walk</button></div>
-          <div id="gov-gaps-legend" class="legend-section" style="margin-top:12px"></div>
+          <label class="layer-check-label"><input type="checkbox" id="gov-gaps-tilt"> Tilt map (perspective view)</label>
+          <div class="section-label" style="margin-top:12px">Travel mode</div>
+          <div class="mode-switch" id="gov-gaps-mode-switch" role="group" aria-label="Travel mode"><button type="button" data-mode="drive" class="active" aria-pressed="true">Drive</button><button type="button" data-mode="walk" aria-pressed="false">Walk</button></div>
+          <div id="gov-gaps-legend" class="legend-section" style="margin-top:14px"></div>
         </div>
         <div id="gov-gaps-tract-detail" class="sidebar-tract-detail">
           <div class="section-label">Selected area</div>
@@ -108,30 +166,43 @@
     </div><!-- /#side-panel -->
 
     <!-- ── CONTENT PAGES (landing, seeker content pages, gov content pages) -->
-    <div id="content-pages">
+    <main id="content-pages" tabindex="-1">
 
       <!-- LANDING -->
       <section id="page-landing" class="content-page active">
         <div class="landing-wrap">
+          <div id="load-error" class="load-error hidden" role="alert">
+            <strong>ReliefGrid couldn’t load its map data.</strong>
+            <span>Check your connection and reload the page. If you’re running locally, serve the folder over HTTP (for example <code>npm run dev</code>) rather than opening the file directly.</span>
+          </div>
           <div class="landing-hero">
-            <div class="landing-word">ReliefGrid</div>
-            <h1>Find help. Understand need.<br>Close the gap.</h1>
-            <p class="landing-sub">ReliefGrid connects people with essential services while helping communities understand where resources are available — and where they're needed most.</p>
+            <div class="landing-word"><span class="ai-spark" aria-hidden="true"></span>AI + geospatial intelligence for social-service access</div>
+            <h1>Find help. Understand need.<br><span class="accent-text">Close the gap.</span></h1>
+            <p class="landing-sub">ReliefGrid connects people with essential services on Long Island and helps governments and nonprofits see where resources are reachable — and where they’re needed most.</p>
           </div>
           <div class="landing-paths">
             <button type="button" class="landing-path landing-path-seeker" id="landing-find-help">
-              <div class="landing-path-icon" aria-hidden="true">🧭</div>
-              <h2>I Need Help</h2>
-              <p>Find shelter, food, healthcare, legal help, and other services near you.</p>
-              <span class="btn btn-primary landing-path-cta">Find Services</span>
+              <div class="landing-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></div>
+              <div class="landing-path-kicker">For individuals</div>
+              <h2>Find Resources</h2>
+              <p>Describe what you need in your own words — shelter, food, healthcare, legal help — and see matching services from ReliefGrid’s listings.</p>
+              <span class="btn btn-primary landing-path-cta">Find help now <span aria-hidden="true">→</span></span>
             </button>
             <button type="button" class="landing-path landing-path-gov" id="landing-open-dashboard">
-              <div class="landing-path-icon" aria-hidden="true">📊</div>
-              <h2>I Manage Services</h2>
-              <p>Governments, nonprofits, and providers: monitor capacity and identify service gaps.</p>
-              <span class="btn btn-secondary landing-path-cta">Open Dashboard</span>
+              <div class="landing-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3h2v16h16v2H3V3zm4 10h3v4H7v-4zm5-5h3v9h-3V8zm5-3h3v12h-3V5z"/></svg></div>
+              <div class="landing-path-kicker">For governments &amp; nonprofits</div>
+              <h2>Analyze Service Gaps</h2>
+              <p>Explore tract-level need, access and statistically significant gap clusters — and ask questions of the data in plain language.</p>
+              <span class="btn btn-secondary landing-path-cta">Open dashboard <span aria-hidden="true">→</span></span>
             </button>
           </div>
+
+          <div class="how-it-works" aria-label="How ReliefGrid AI works">
+            <div class="how-step"><span class="how-num">1</span><strong>AI interprets</strong><span>Natural-language requests and questions are turned into a structured query.</span></div>
+            <div class="how-step"><span class="how-num">2</span><strong>ReliefGrid retrieves</strong><span>Answers come from verified listings and precomputed accessibility analysis — the source of truth.</span></div>
+            <div class="how-step"><span class="how-num">3</span><strong>AI explains</strong><span>Results are summarized in plain language and linked to the map. AI never invents services or statistics.</span></div>
+          </div>
+
           <div class="landing-flow">
             <div class="landing-flow-step"><strong>Find</strong><span>People locate services that actually have room right now.</span></div>
             <div class="landing-flow-arrow" aria-hidden="true">&rarr;</div>
@@ -140,8 +211,8 @@
             <div class="landing-flow-step"><strong>Understand</strong><span>Governments see system-wide gaps and where to focus.</span></div>
           </div>
           <div class="landing-footer">
-            <span id="landing-stat-line"></span>
-            <button type="button" class="landing-methods-link" id="landing-data-methods">How ReliefGrid's data works</button>
+            <span id="landing-stat-line" class="stat-line"></span>
+            <button type="button" class="landing-methods-link" id="landing-data-methods">How ReliefGrid’s data works</button>
           </div>
         </div>
       </section>
@@ -149,32 +220,52 @@
       <!-- SEEKER: HOME -->
       <section id="page-seeker-home" class="content-page">
         <div class="seeker-container">
-          <h1 class="seeker-home-title">What do you need help with today?</h1>
+          <section class="navigator" aria-labelledby="navigator-title">
+            <div class="navigator-kicker"><span class="ai-spark" aria-hidden="true"></span>ReliefGrid Resource Navigator</div>
+            <h1 id="navigator-title" class="seeker-home-title">What do you need help with?</h1>
+            <p class="navigator-sub">Tell us in your own words. ReliefGrid will match you with services from its Long Island listings.</p>
+            <form id="navigator-form" class="ai-input-shell" autocomplete="off">
+              <label for="navigator-input" class="sr-only">Describe what you need</label>
+              <textarea id="navigator-input" rows="3" maxlength="600" placeholder="e.g. I need somewhere safe to sleep tonight and I don’t have a car"></textarea>
+              <div class="ai-input-foot">
+                <span id="navigator-count" class="muted small" aria-live="polite"></span>
+                <button type="submit" class="btn btn-ai" id="navigator-submit"><span class="btn-label">Find help</span></button>
+              </div>
+            </form>
+            <div id="navigator-setup"></div>
+            <div id="navigator-status" class="ai-status" role="status" aria-live="polite" hidden></div>
+            <div id="navigator-examples" class="ai-suggestions" aria-label="Example requests"></div>
+            <p class="ai-footnote">AI helps understand your request; every result comes from ReliefGrid’s listings. Please don’t include your name, phone number or other personal details.</p>
+            <p class="safety-line"><strong>In immediate danger?</strong> Call 911. For a mental-health crisis, call or text 988. ReliefGrid cannot contact emergency services.</p>
+          </section>
+
+          <div class="divider-label"><span>Or choose a category</span></div>
           <div id="seeker-category-grid" class="seeker-cat-grid"></div>
           <button type="button" class="seeker-link-btn" id="seeker-browse-all">Or browse everything near you</button>
 
           <div class="seeker-location-block">
             <div class="section-label">Your location</div>
             <form id="seeker-location-form" class="seeker-location-form">
+              <label for="seeker-location-input" class="sr-only">Long Island town</label>
               <input type="text" id="seeker-location-input" placeholder="Enter a Long Island town (e.g. Hempstead)" autocomplete="off" />
               <button type="submit" class="btn btn-secondary">Go</button>
             </form>
             <button type="button" class="btn btn-ghost seeker-use-location-btn" id="seeker-use-location">Use My Location</button>
-            <div id="seeker-location-note" class="seeker-location-note hidden"></div>
+            <div id="seeker-location-note" class="seeker-location-note hidden" role="status"></div>
             <div id="seeker-location-badge" class="muted small"></div>
           </div>
 
-          <div class="section-label" style="margin-top:20px">Quick filters</div>
+          <div class="section-label" style="margin-top:22px">Quick filters</div>
           <div id="seeker-quick-filters" class="seeker-quick-filters">
-            <button type="button" data-filter="open_now">Open now</button>
-            <button type="button" data-filter="available_now">Available now</button>
-            <button type="button" data-filter="walk_ins">Walk-ins accepted</button>
-            <button type="button" data-filter="near_me">Near me</button>
+            <button type="button" data-filter="open_now" aria-pressed="false">Open now</button>
+            <button type="button" data-filter="available_now" aria-pressed="false">Available now</button>
+            <button type="button" data-filter="walk_ins" aria-pressed="false">Walk-ins accepted</button>
+            <button type="button" data-filter="near_me" aria-pressed="false">Near me</button>
           </div>
 
           <button type="button" class="guided-cta" id="seeker-guided-start">
             <strong>Not sure where to start?</strong>
-            <span>Help Me Find the Right Service &rarr;</span>
+            <span>Answer a few simple questions &rarr;</span>
           </button>
         </div>
       </section>
@@ -215,7 +306,9 @@
             <div class="landing-flow-step"><strong>Understand</strong><span>Governments see the whole picture.</span></div>
           </div>
           <div class="demo-banner"><strong>This is a prototype.</strong> Availability information shown throughout ReliefGrid is simulated for demonstration. Always confirm directly with a provider before relying on it.</div>
-          <p class="muted small">ReliefGrid does not collect or store any personal or identifying information about people seeking help. Saved resources are kept only in your own browser, on your own device.</p>
+          <h2 class="about-h2">How AI is used</h2>
+          <p>When you describe what you need, an AI model turns your words into a search (for example “shelter + food, needed now”). ReliefGrid then searches its own listings — the AI never invents services, addresses, hours or availability. You can see and change the needs it identified.</p>
+          <p class="muted small">ReliefGrid does not collect or store any personal or identifying information about people seeking help, and does not store what you type. To interpret a request, the text is sent through ReliefGrid’s server to an AI provider — so please leave out names, phone numbers and other identifying details. Saved resources are kept only in your own browser, on your own device.</p>
         </div>
       </section>
 
@@ -244,13 +337,13 @@
           </div>
           <div id="gov-capacity-tiles" class="analytics-tiles"></div>
           <div class="analytics-charts">
-            <div class="chart-card"><h3>Availability by service type</h3><canvas id="chart-gov-status"></canvas><p class="chart-note">Resource exists vs. resource currently reporting Available/Limited/Full/Closed.</p></div>
-            <div class="chart-card"><h3>Shelter beds: occupied vs. available by county</h3><canvas id="chart-gov-shelter"></canvas></div>
+            <div class="chart-card"><h3>Availability by service type</h3><canvas id="chart-gov-status" aria-label="Stacked bar chart of availability status by service type"></canvas><p class="chart-note">Resource exists vs. resource currently reporting Available/Limited/Full/Closed.</p></div>
+            <div class="chart-card"><h3>Shelter beds: occupied vs. available by county</h3><canvas id="chart-gov-shelter" aria-label="Bar chart of shelter beds by county"></canvas></div>
           </div>
           <div class="gap-section">
             <h3>Where need is high but available capacity is not</h3>
             <p class="page-intro" id="gov-capacity-gap-headline">—</p>
-            <div class="chart-card"><canvas id="chart-gov-gap"></canvas><p class="chart-note">For each high-need census tract, the count of resources currently showing "Available" within roughly a 15-minute drive.</p></div>
+            <div class="chart-card"><canvas id="chart-gov-gap" aria-label="Bar chart of high-need tracts by number of available resources nearby"></canvas><p class="chart-note">For each high-need census tract, the count of resources currently showing "Available" within roughly a 15-minute drive.</p></div>
             <div id="gov-capacity-gap-list"></div>
           </div>
         </div>
@@ -299,11 +392,13 @@
             <div class="method-card"><h3>Service Gap</h3><p>Community Need minus Service Access (both standardized). Positive values mean need exceeds access. Statistically significant clusters are identified with Local Indicators of Spatial Association (LISA) at the 5% significance level — shown on the map as "Service Gap Clusters."</p></div>
             <div class="method-card"><h3>Resource network</h3><p>182 shelters, food pantries, clinics, legal aid, and social-service locations across Nassau &amp; Suffolk counties, compiled from county and nonprofit resource lists.</p></div>
             <div class="method-card"><h3>Availability (prototype)</h3><p>Beds, meals, wait times, and open/closed status shown throughout ReliefGrid are <strong>simulated</strong> for a subset of resources, or entered through the demo Provider Updates page. See <code>services/availability.js</code> for the adapter architecture a real integration (provider APIs, HMIS, Bitfocus Clarity, 211, findhelp, Unite Us, government open data) would plug into.</p></div>
+            <div class="method-card method-ai"><h3>AI assistance</h3><p>AI is an interpretation layer, not a data source. The Resource Navigator converts a request into ReliefGrid’s existing categories and filters; results come from the listings above. Ask ReliefGrid can only read the precomputed tract, cluster and resource data through a fixed set of analysis tools; referenced areas are checked against that data and figures that can’t be matched are flagged. See <code>docs/AI_ARCHITECTURE.md</code>.</p></div>
             <div class="method-card method-limitations"><h3>Limitations</h3><ul>
               <li>Travel-time catchments are estimated, not live routing.</li>
               <li>Availability is demo data unless a provider has updated it in this browser session.</li>
               <li>Eligibility rules are not modeled per resource — always confirm with the provider.</li>
               <li>McKinney-Vento school data (used in early research) reflects school-identified homelessness only; adults are undercounted.</li>
+              <li>Service Access is a single combined score per tract; it is not broken down by service category.</li>
             </ul></div>
           </div>
           <div class="source-disclaimer-block" style="margin-top:16px">
@@ -312,7 +407,7 @@
         </div>
       </section>
 
-    </div><!-- /#content-pages -->
+    </main><!-- /#content-pages -->
 
   </div><!-- /#app -->
 

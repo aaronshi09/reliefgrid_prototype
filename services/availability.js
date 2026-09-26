@@ -52,12 +52,14 @@
  * ==========================================================================*/
 
 /* ── Status vocabulary ──────────────────────────────────────────────────── */
+// Colours are presentation only (tuned for ReliefGrid's dark interface); the
+// status keys, labels and glyphs are the contract the rest of the app uses.
 export const STATUS = {
-  available: { key: 'available', label: 'Available',            short: 'A', glyph: '✓', color: '#1a7f37', bg: '#dcfce7', fg: '#14532d' },
-  limited:   { key: 'limited',   label: 'Limited Availability', short: 'L', glyph: '!', color: '#b45309', bg: '#fef3c7', fg: '#7c2d12' },
-  full:      { key: 'full',      label: 'Full',                 short: 'F', glyph: '×', color: '#b91c1c', bg: '#fee2e2', fg: '#7f1d1d' },
-  closed:    { key: 'closed',    label: 'Closed',               short: 'C', glyph: '–', color: '#4b5563', bg: '#f3f4f6', fg: '#1f2937' },
-  unknown:   { key: 'unknown',   label: 'Unknown',              short: '?', glyph: '?', color: '#9ca3af', bg: '#f9fafb', fg: '#4b5563' },
+  available: { key: 'available', label: 'Available',            short: 'A', glyph: '✓', color: '#3ecf7a', bg: 'rgba(62,207,122,0.14)',  fg: '#a6f2c6' },
+  limited:   { key: 'limited',   label: 'Limited Availability', short: 'L', glyph: '!', color: '#f2b340', bg: 'rgba(242,179,64,0.14)',  fg: '#fbd98f' },
+  full:      { key: 'full',      label: 'Full',                 short: 'F', glyph: '×', color: '#f0645a', bg: 'rgba(240,100,90,0.14)',  fg: '#ffb3ab' },
+  closed:    { key: 'closed',    label: 'Closed',               short: 'C', glyph: '–', color: '#8a96a8', bg: 'rgba(138,150,168,0.14)', fg: '#c9d2df' },
+  unknown:   { key: 'unknown',   label: 'Unknown',              short: '?', glyph: '?', color: '#5d6a7e', bg: 'rgba(93,106,126,0.16)',  fg: '#aab6c7' },
 };
 
 /* ── Source vocabulary ──────────────────────────────────────────────────── */
