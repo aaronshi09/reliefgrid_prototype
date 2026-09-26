@@ -10,7 +10,9 @@
  *     that the data actually supports
  *   - personal numbers are redacted; the API key never appears in a request body;
  *     requests are sent with store:false
- *   - analyst ids are filtered to tool output; fabricated figures are flagged
+ *   - analytics: rules-first classification, off-topic / no-selection replies
+ *     without a model call, only relevant data sent, ids filtered to the
+ *     retrieved context, fabricated figures and siting directives flagged
  *   - missing key / 429 / 404 / network failure / timeout / malformed output
  *     all fail safely with user-safe codes
  * ==========================================================================*/
@@ -33,9 +35,6 @@ globalThis.fetch = async (input, init = {}) => {
 };
 // Interactions API (structured output) and generateContent (tool loop) response shapes.
 const interaction = (o) => ({ json: { id: 'int_test', status: 'completed', steps: [{ type: 'user_input', content: [{ type: 'text', text: '…' }] }, { type: 'model_output', content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o) }] }] } });
-const gen = (parts) => ({ json: { candidates: [{ finishReason: 'STOP', content: { role: 'model', parts } }] } });
-const oai = (m) => ({ json: { choices: [{ finish_reason: 'stop', message: m }] } });
-const emptyFocus = { tractIds: [], facilityIds: [], layer: null, mode: null };
 const needs = (o) => interaction({ requestType: 'service_request', categories: [], urgency: 'unspecified', transportation: 'unspecified', walkInsNeeded: false, householdContext: [], locationText: '', unmatchedNeeds: [], clarifyingQuestion: '', safetyConcern: false, ...o });
 
 const nav = await import(new URL('server/ai/workflows/navigator.js', root));
@@ -121,27 +120,105 @@ await rejects(nav.interpret('need food'), 'not_configured', 'missing GEMINI_API_
 process.env.GEMINI_API_KEY = 'check-key-DO-NOT-LEAK';
 await rejects(nav.locationContext({ facilityId: shelterId }), 'not_configured', 'Google Maps grounding is off unless enabled');
 
-// ── Analyst: tool loop + grounding.
-queue = [
-  oai({ content: null, tool_calls: [{ id: 'a', type: 'function', function: { name: 'rank_tracts', arguments: JSON.stringify({ metric: 'mismatch_index', order: 'highest', mode: 'drive', cluster: 'HH', limit: 3 }) } }] }),
-  oai({ content: JSON.stringify({ answerable: true, answer: 'Tract 36103190605 (Suffolk) has a gap of 2.94 and access 2.3 — 47.3% worse than tract 36000000000.', keyFindings: [{ text: 'Need 1.38.', tractIds: ['36103190605', '36059999999'], facilityIds: ['made-up'] }], mapFocus: { tractIds: ['36103190605', '36111111111'], facilityIds: [], layer: 'lisa', mode: 'drive' }, limitations: [], followUps: [] }) }),
+// ── Ask ReliefGrid: classification (rules first; no data involved).
+const { classifyByRules } = await import(new URL('server/analytics/classify.js', root));
+const expectDomains = [
+  ['Where are the largest service gaps?', ['service_gap']],
+  ['Which areas have high need but low access?', ['need_access']],
+  ['Explain the service-gap layer.', ['map_explanation']],
+  ['Compare walking and driving accessibility.', ['mode_comparison']],
+  ['Where are the strongest spatial clusters?', ['lisa']],
+  ['Where should another shelter be built?', ['investigation', 'category_access']],
+  ['Where is emergency housing least accessible?', ['category_access']],
+  ['What resources are located near this area?', ['resources', 'selected_area']],
+  ['What is E2SFCA?', ['methodology']],
 ];
-r = await ana.analyze({ question: 'Where are the largest gaps?', context: { mode: 'drive' } });
-check(JSON.stringify(r.mapFocus.tractIds) === '["36103190605"]', 'map focus keeps only tracts returned by tools');
-check(r.keyFindings[0].facilityIds.length === 0, 'invented facility ids are removed');
-check(r.grounding.unverifiedFigures.includes('47.3%') && !r.grounding.unverifiedFigures.includes('2.94'), 'fabricated figures are flagged, real ones pass');
-queue = [oai({ content: JSON.stringify({ answerable: true, answer: 'Suffolk is worse.', keyFindings: [], mapFocus: emptyFocus, limitations: [], followUps: [] }) })];
-await rejects(ana.analyze({ question: 'Which county is worse?' }), 'bad_output', 'answers that consulted no data are rejected');
+for (const [q, want] of expectDomains) {
+  const c = classifyByRules(q, { selectedTract: '36103190605' });
+  check(c.inScope === true && want.every(d => c.domains.includes(d)), `classifies "${q}" → ${c.domains.join(', ')}`);
+}
+for (const q of ['Write me an essay about World War II.', 'Who should I vote for?', 'What stock should I buy?']) {
+  check(classifyByRules(q).inScope === false, `recognises off-topic: "${q}"`);
+}
+check(classifyByRules('Which neighborhoods are struggling the most?').inScope === null, 'ambiguous wording is left to the model classifier');
+
+// ── Ask ReliefGrid: replies that must not call any model.
+const callsBefore = sent.length;
+queue = [];
+r = await ana.analyze({ question: 'Write me an essay about World War II.' });
+check(r.scope === 'out_of_scope' && sent.length === callsBefore, 'off-topic → scope message without a model call');
+r = await ana.analyze({ question: 'Explain this area.', context: { mode: 'drive' } });
+check(r.scope === 'needs_selection' && sent.length === callsBefore, '"this area" with nothing selected → asks for a selection, no model call');
+r = await ana.analyze({ question: 'Tell me about tract 36999999999' });
+check(r.scope === 'insufficient_data' && sent.length === callsBefore, 'unknown tract id → says ReliefGrid has no such tract, no model call');
+
+// ── Ask ReliefGrid: retrieval → one structured OpenAI call → validation.
+const oaiResp = (o) => ({ json: { id: 'resp_test', object: 'response', status: 'completed', model: 'gpt-6-luna', incomplete_details: null, error: null,
+  output: [{ type: 'message', id: 'msg_1', role: 'assistant', status: 'completed', content: [{ type: 'output_text', text: typeof o === 'string' ? o : JSON.stringify(o), annotations: [] }] }] } });
+const brief = (o) => oaiResp({ status: 'answered', answer: 'x', keyFindings: [], referencedTractIds: [], referencedFacilityIds: [], suggestedLayer: 'none', limitations: [], followUps: [], ...o });
+let captured = null;
+queue = [(body) => { captured = body; const ctx = JSON.parse(body.input.split('CONTEXT:\n')[1]).context; const top = ctx.service_gap_ranking.tracts[0];
+  return brief({ answer: `The largest Service Gap is in tract ${top.geoid} (${top.county}) at ${top.mismatch_index}, which is 47.3% above tract 36000000000.`,
+    keyFindings: [{ text: `Top gap ${top.mismatch_index}.`, tractIds: [top.geoid, '36059999999'], facilityIds: ['made-up'] }],
+    referencedTractIds: [top.geoid, '36111111111'], suggestedLayer: 'mismatch_index' }); }];
+r = await ana.analyze({ question: 'Where are the largest service gaps?', context: { mode: 'drive', layer: 'lisa' } });
+const oreq = sent.at(-1);
+check(oreq.url.endsWith('/v1/responses'), 'analyst uses the OpenAI SDK Responses API');
+check(captured.model === 'gpt-6-luna' && captured.store === false && captured.text?.format?.strict === true, 'configured model, store:false, strict JSON schema');
+check(oreq.headers.authorization === 'Bearer check' && !oreq.raw.includes('"check"'), 'OpenAI key sent only as a header, never in the body');
+const sentCtx = JSON.parse(captured.input.split('CONTEXT:\n')[1]).context;
+check(Object.keys(sentCtx).join() === 'service_gap_ranking' && captured.input.length < 8000, `only the relevant data is sent (${Object.keys(sentCtx).join()}, ${captured.input.length} chars)`);
+check(r.mapFocus.tractIds.length === 1 && r.mapFocus.layer === 'mismatch_index', 'map focus keeps only tracts from the retrieved context');
+check(r.keyFindings[0].tractIds.length === 1 && r.keyFindings[0].facilityIds.length === 0, 'invented ids are removed from findings');
+check(r.grounding.unverifiedFigures.includes('47.3%') && !r.grounding.unverifiedFigures.includes(String(sentCtx.service_gap_ranking.tracts[0].mismatch_index)), 'fabricated figures flagged; retrieved values pass');
+check(r.grounding.unverifiedFigures.includes('36000000000'), 'tract ids not in the context are flagged');
+check(r.metricsUsed.includes('Service Gap') && r.meta.provider === 'openai', '"Analysis based on" comes from the retrieval, not the model');
+
+// Methodology is grounded in the project's own documentation.
+queue = [(body) => { captured = body; return brief({ answer: 'Documented as an E2SFCA score within a 15-minute catchment.' }); }];
+r = await ana.analyze({ question: 'What is E2SFCA?' });
+const mctx = JSON.parse(captured.input.split('CONTEXT:\n')[1]).context;
+check(Object.keys(mctx).join() === 'methodology' && mctx.methodology.documented_methods.some(m => /Enhanced 2-Step Floating Catchment Area/.test(m.text)), 'methodology questions receive the Data & Methods text from index.html (and nothing else)');
+
+// Selected area context and siting framing.
+queue = [(body) => { captured = body; return brief({ answer: 'Tract 36103190605 (Suffolk) has a high gap. The county should build a shelter in tract 36103190605.', referencedTractIds: ['36103190605'] }); }];
+r = await ana.analyze({ question: 'Where should another shelter be built near this area?', context: { mode: 'drive', selectedTract: '36103190605' } });
+const sctx = JSON.parse(captured.input.split('CONTEXT:\n')[1]).context;
+check(sctx.selected_area?.tract?.geoid === '36103190605' && sctx.category_proximity && sctx.high_need_low_access, 'selected tract + need/access + shelter proximity retrieved for a siting question');
+check(r.limitations[0].includes('zoning') && r.grounding.directiveLanguage === true, 'siting answers get the decision-support limitation; directive wording is flagged');
+check(r.areas[0].geoid === '36103190605' && r.areas[0].role === 'selected', 'selected area is returned for map highlighting');
+
+// Model-assisted classification only when rules are undecided.
+queue = [
+  (body) => { captured = body; return oaiResp({ inScope: true, domains: ['community_need'], category: 'none', mode: 'none', refersToSelection: false }); },
+  brief({ answer: 'Highest need tracts listed.' }),
+];
+r = await ana.analyze({ question: 'Which neighborhoods are struggling the most?' });
+check(captured.text.format.name === 'reliefgrid_route' && !captured.input.includes('need_score') && r.domains.join() === 'community_need' && r.meta.classifiedBy === 'model', 'undecided wording is routed by a data-free classification call');
+
+// Failure modes (analyst).
+queue = [{ status: 429, json: { error: { message: 'Rate limit' } } }];
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'rate_limited', 'OpenAI rate limit → rate_limited');
+queue = [{ status: 401, json: { error: { message: 'bad key' } } }];
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'not_configured', 'invalid OpenAI key → not_configured');
+queue = ['network'];
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'unavailable', 'network failure → unavailable');
+queue = [oaiResp('not json')];
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'bad_output', 'malformed model output → bad_output');
+queue = [{ json: { id: 'r', object: 'response', status: 'completed', output: [{ type: 'message', role: 'assistant', content: [{ type: 'refusal', refusal: 'no' }] }] } }];
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'blocked', 'model refusal → blocked');
+queue = ['hang'];
+const { openai: oaiProvider } = await import(new URL('server/ai/providers/openai.js', root));
+await rejects(oaiProvider.generateJSON({ system: 's', prompt: 'p', schema: { type: 'object' }, timeoutMs: 1200 }), 'timeout', 'hung OpenAI requests time out');
 queue = [{ status: 503, json: {} }];
-await rejects(ana.analyze({ question: 'Compare counties' }), 'unavailable', 'no silent provider switch when fallback is disabled');
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'unavailable', 'no silent provider switch when fallback is disabled');
+delete process.env.OPENAI_API_KEY;
+await rejects(ana.analyze({ question: 'Where are the largest service gaps?' }), 'not_configured', 'missing OPENAI_API_KEY → not_configured');
+process.env.OPENAI_API_KEY = 'check';
 process.env.AI_ALLOW_FALLBACK = 'true';
-queue = [
-  { status: 503, json: {} },
-  gen([{ functionCall: { name: 'summarize_by_county', args: { mode: 'drive' } } }]),
-  gen([{ text: JSON.stringify({ answerable: true, answer: 'Suffolk has 127 HH tracts (33.1%); Nassau has 29 (10.3%).', keyFindings: [], mapFocus: emptyFocus, limitations: [], followUps: [] }) }]),
-];
-r = await ana.analyze({ question: 'Compare counties' });
-check(r.meta.fallbackUsed && r.meta.provider === 'gemini' && r.grounding.unverifiedFigures.length === 0, 'opt-in fallback uses the same data tools on Gemini (SDK generateContent)');
+queue = [{ status: 503, json: {} }, interaction({ status: 'answered', answer: 'Suffolk has more HH tracts.', keyFindings: [], referencedTractIds: [], referencedFacilityIds: [], suggestedLayer: 'lisa', limitations: [], followUps: [] })];
+r = await ana.analyze({ question: 'Where are the strongest spatial clusters?' });
+check(r.meta.fallbackUsed && r.meta.provider === 'gemini', 'opt-in fallback sends the same retrieved context to Gemini');
 delete process.env.AI_ALLOW_FALLBACK;
 
 console.log(failures ? `\n${failures} check(s) failed` : '\nAll checks passed');

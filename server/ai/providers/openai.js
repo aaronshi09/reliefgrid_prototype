@@ -1,72 +1,72 @@
 /* ============================================================================
- * OpenAI adapter (Chat Completions REST API).
- * Implements the same provider interface as gemini.js:
+ * OpenAI adapter — OpenAI's official Node SDK (`openai`), Responses API.
+ * Implements the provider interface used by server/ai/router.js:
  *   generateJSON({ system, prompt, schema, schemaName, timeoutMs }) → object
- *   runTools({ system, messages, tools, execute, finalSchema, ... }) → { text }
- * Structured output uses strict json_schema, so the final answer is shape-
- * checked by the API as well as by ReliefGrid's own validator.
+ *
+ * Structured Outputs (strict json_schema) means the reply is shape-checked by
+ * the API as well as by ReliefGrid's own validators. Requests are sent with
+ * store:false. The API key is read from the server environment only
+ * (server/ai/config.js) and is only ever sent to OpenAI in a request header.
  * ==========================================================================*/
+import OpenAI from 'openai';
 import { aiConfig } from '../config.js';
 import { AIError, codeForUpstreamStatus } from '../errors.js';
-import { parseJSONLoose, isTimeout, upstreamDetail } from './util.js';
+import { parseJSONLoose } from './util.js';
 
-async function complete(body, timeoutMs) {
-  const cfg = aiConfig().providers.openai;
-  if (!cfg.apiKey) throw new AIError('not_configured', 'OPENAI_API_KEY missing');
-  let res;
-  try {
-    res = await fetch(`${cfg.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.apiKey}` },
-      body: JSON.stringify({ model: cfg.model, ...body }),
-      signal: AbortSignal.timeout(Math.max(1000, timeoutMs)),
-    });
-  } catch (e) {
-    throw new AIError(isTimeout(e) ? 'timeout' : 'unavailable', 'openai request failed');
-  }
-  if (!res.ok) throw new AIError(codeForUpstreamStatus(res.status), `openai ${await upstreamDetail(res)}`);
-  const json = await res.json().catch(() => null);
-  const choice = json?.choices?.[0];
-  if (!choice) throw new AIError('bad_output', 'openai returned no choice');
-  if (choice.finish_reason === 'content_filter' || choice.message?.refusal) throw new AIError('blocked', 'openai refusal / content filter');
-  return choice;
+let cached = { key: null, client: null };
+function client() {
+  const { apiKey } = aiConfig().providers.openai;
+  if (!apiKey) throw new AIError('not_configured', 'OPENAI_API_KEY missing');
+  if (cached.key !== apiKey) cached = { key: apiKey, client: new OpenAI({ apiKey, maxRetries: 0 }) };
+  return cached.client;
 }
 
-const responseFormat = (schema, name) => (schema ? { type: 'json_schema', json_schema: { name: name || 'reliefgrid_output', strict: true, schema } } : undefined);
+/** One SDK call under a hard deadline, with every failure mapped to a user-safe
+ *  AIError. Details go to server logs only — never user text or the key. */
+async function guarded(timeoutMs, fn) {
+  const ctrl = new AbortController();
+  let timer;
+  const deadline = new Promise((_, rej) => { timer = setTimeout(() => { ctrl.abort(); rej(new AIError('timeout', 'openai deadline exceeded')); }, Math.max(1000, timeoutMs)); });
+  try {
+    return await Promise.race([fn(ctrl.signal), deadline]);
+  } catch (e) {
+    if (e instanceof AIError) throw e;
+    if (ctrl.signal.aborted || e?.name === 'APIUserAbortError' || e?.constructor?.name === 'APIConnectionTimeoutError') throw new AIError('timeout', 'openai request aborted');
+    const status = Number(e?.status);
+    const detail = `openai ${e?.constructor?.name || e?.name || 'error'}${status ? ` ${status}` : ''}${e?.message ? ` — ${String(e.message).slice(0, 160)}` : ''}`;
+    if (Number.isFinite(status) && status > 0) {
+      if (status === 404) throw new AIError('unavailable', `${detail} (check OPENAI_MODEL)`);
+      if (status === 400 && /content|policy|safety/i.test(String(e?.message))) throw new AIError('blocked', detail);
+      throw new AIError(codeForUpstreamStatus(status), detail);
+    }
+    throw new AIError('unavailable', detail); // APIConnectionError (network)
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export const openai = {
   id: 'openai',
 
-  async generateJSON({ system, prompt, schema, schemaName, timeoutMs = 20000 }) {
-    const choice = await complete({
-      messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
-      response_format: responseFormat(schema, schemaName),
-    }, timeoutMs);
-    return parseJSONLoose(choice.message?.content || '');
-  },
+  async generateJSON({ system, prompt, schema, schemaName, timeoutMs = 20000, maxOutputTokens = 2000, reasoningEffort }) {
+    const cfg = aiConfig().providers.openai;
+    const params = {
+      model: cfg.model,
+      instructions: system,
+      input: prompt,
+      store: false,
+      max_output_tokens: maxOutputTokens,
+      text: { format: { type: 'json_schema', name: schemaName || 'reliefgrid_output', strict: true, schema } },
+    };
+    const effort = reasoningEffort ?? cfg.reasoningEffort;
+    if (effort) params.reasoning = { effort };
+    const res = await guarded(timeoutMs, (signal) => client().responses.create(params, { signal }));
 
-  async runTools({ system, messages, tools, execute, finalSchema, finalSchemaName, maxSteps = 6, deadline }) {
-    const msgs = [{ role: 'system', content: system }, ...messages.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.text }))];
-    const toolDefs = tools.map(t => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.parameters } }));
-    for (let step = 0; ; step++) {
-      const last = step >= maxSteps;
-      const remaining = deadline - Date.now();
-      if (remaining < 2000) throw new AIError('timeout', 'openai tool loop out of time');
-      const choice = await complete({
-        messages: msgs,
-        tools: toolDefs,
-        tool_choice: last ? 'none' : 'auto',
-        response_format: responseFormat(finalSchema, finalSchemaName),
-      }, remaining);
-      const calls = choice.message?.tool_calls || [];
-      if (!calls.length || last) return { text: choice.message?.content || '' };
-      msgs.push({ role: 'assistant', content: choice.message.content ?? null, tool_calls: calls });
-      for (const c of calls) {
-        let args = {};
-        try { args = JSON.parse(c.function?.arguments || '{}'); } catch (_) { args = {}; }
-        const result = await execute(c.function?.name, args);
-        msgs.push({ role: 'tool', tool_call_id: c.id, content: JSON.stringify(result) });
-      }
+    const refused = (res?.output || []).some(o => o?.type === 'message' && (o.content || []).some(c => c?.type === 'refusal'));
+    if (refused) throw new AIError('blocked', 'openai refusal');
+    if (res?.status && res.status !== 'completed') {
+      throw new AIError(res.status === 'failed' ? 'unavailable' : 'bad_output', `openai response ${res.status}${res.incomplete_details?.reason ? ` (${res.incomplete_details.reason})` : ''}`);
     }
+    return parseJSONLoose(res?.output_text || '');
   },
 };

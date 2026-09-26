@@ -12,7 +12,9 @@
  *                             default Gemini model is named)
  *   GEMINI_THINKING_LEVEL     optional: minimal | low | medium | high. Unset =
  *                             the model's own default (minimal on Flash-Lite)
- *   OPENAI_MODEL              default gpt-5-mini
+ *   OPENAI_MODEL              default gpt-6-luna (the ONLY place the default
+ *                             OpenAI model is named)
+ *   OPENAI_REASONING_EFFORT   default low (none | low | medium | high)
  *   AI_ALLOW_FALLBACK         "true" → route to the other provider when the
  *                             primary is unavailable, for tasks marked
  *                             fallbackSafe (same data, same capabilities)
@@ -39,8 +41,12 @@ export function aiConfig() {
       },
       openai: {
         apiKey: env('OPENAI_API_KEY'),
-        model: env('OPENAI_MODEL', 'gpt-5-mini'),
-        baseUrl: env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+        // GPT-6 Luna: OpenAI's efficient tier for focused, high-volume work, with
+        // Structured Outputs. ReliefGrid retrieves the data deterministically, so
+        // the model only interprets supplied values — a job that doesn't need the
+        // pricier Sol / Astra tiers. Override with OPENAI_MODEL.
+        model: env('OPENAI_MODEL', 'gpt-6-luna'),
+        reasoningEffort: env('OPENAI_REASONING_EFFORT', 'low') || null,
       },
     },
 
@@ -53,7 +59,10 @@ export function aiConfig() {
       'navigator.explain':          { primary: 'gemini', fallback: 'openai', fallbackSafe: true,  timeoutMs: 20000 },
       // Google Maps grounding exists only on Gemini: no fallback.
       'navigator.locationContext':  { primary: 'gemini', fallback: null,     fallbackSafe: false, timeoutMs: 25000 },
-      'analyst.answer':             { primary: 'openai', fallback: 'gemini', fallbackSafe: true,  timeoutMs: 30000, maxToolSteps: 6, totalBudgetMs: 60000 },
+      // Ask ReliefGrid: optional question classification (only when the rules
+      // can't decide) and the grounded explanation of retrieved data.
+      'analyst.classify':           { primary: 'openai', fallback: 'gemini', fallbackSafe: true,  timeoutMs: 12000 },
+      'analyst.answer':             { primary: 'openai', fallback: 'gemini', fallbackSafe: true,  timeoutMs: 40000 },
     },
 
     allowFallback: flag('AI_ALLOW_FALLBACK'),

@@ -2,7 +2,7 @@
   "functions": {
     "api/**/*.js": {
       "maxDuration": 60,
-      "includeFiles": "{longisland_facilities.geojson,tracts_drive_diagnostics.geojson,tracts_walk_diagnostics.geojson,diagnostics_drive.json,diagnostics_walk.json}"
+      "includeFiles": "{index.html,longisland_facilities.geojson,tracts_drive_diagnostics.geojson,tracts_walk_diagnostics.geojson,diagnostics_drive.json,diagnostics_walk.json}"
     }
   },
   "headers": [

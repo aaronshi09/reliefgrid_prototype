@@ -23,10 +23,11 @@ import { AI_CLIENT_CONFIG } from './config.js';
 
 const $ = (id) => document.getElementById(id);
 const SUGGESTIONS = [
-  'Which areas have the largest emergency housing accessibility gaps?',
-  'Where are food assistance resources least accessible?',
-  'Which areas should we investigate for additional services?',
-  'Explain the accessibility patterns shown on this map.',
+  'Where are the largest service gaps?',
+  'Show high-need, low-access areas.',
+  'Explain the selected area.',
+  'Compare walking and driving access.',
+  'Where are significant spatial clusters?',
 ];
 const LAYER_NAME = { lisa: 'Service Gap Clusters', mismatch_index: 'Service Gap', need_score: 'Community Need', access_index: 'Service Access' };
 
@@ -50,7 +51,7 @@ export function initAnalyst() {
   document.addEventListener('rg:tract-click', (e) => showTract(e.detail.geoid, false));
   document.addEventListener('rg:ask-about-tract', (e) => {
     showTract(e.detail.geoid, true);
-    if (getAIStatus().analyst) ask(`Explain the service-gap pattern in census tract ${e.detail.geoid} and how it compares with the rest of the region.`);
+    if (getAIStatus().analyst) ask('Explain this area and how it compares with nearby tracts.');
   });
   $('analyst-clear')?.addEventListener('click', clearThread);
   loadAIStatus().then(renderAvailability);
@@ -110,7 +111,7 @@ async function ask(raw) {
       question,
       context: { mode: AppState.mode, layer: currentLayer(), selectedTract: selectedGeoid },
       history: thread.filter(t => t.a && t.state === 'done').slice(-AI_CLIENT_CONFIG.limits.historyTurns)
-        .map(t => ({ q: t.q, a: String(t.a.answer || '').slice(0, 700) })),
+        .map(t => ({ q: t.q, a: String(t.a.answer || '').slice(0, 700), domains: t.a.domains || [] })),
     });
     item.a = r; item.state = 'done';
     syncMap(r);
@@ -133,6 +134,8 @@ function clearThread() {
 
 /* ── Map synchronisation (existing layers only) ─────────────────────── */
 function syncMap(r) {
+  // Off-topic / no-selection replies carry no map instructions: leave the map alone.
+  if (r.scope === 'out_of_scope' || r.scope === 'needs_selection') return;
   const focus = r.mapFocus || {};
   if (focus.mode && focus.mode !== AppState.mode) setTravelMode(focus.mode);
   if (focus.layer && focus.layer !== currentLayer()) setAskLayer(focus.layer);
@@ -168,15 +171,23 @@ function renderThread() {
 }
 function loadingHTML() {
   return `<div class="qa-a is-loading" aria-busy="true"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Analyzing ReliefGrid data…</div>
-    <div class="ai-progress small"><div class="ai-step active"><span class="ai-step-dot"></span>Selecting the relevant analysis</div><div class="ai-step"><span class="ai-step-dot"></span>Reading precomputed tract results</div><div class="ai-step"><span class="ai-step-dot"></span>Explaining findings</div></div>
+    <div class="ai-progress small"><div class="ai-step active"><span class="ai-step-dot"></span>Identifying the relevant analysis</div><div class="ai-step"><span class="ai-step-dot"></span>Retrieving ReliefGrid metrics</div><div class="ai-step"><span class="ai-step-dot"></span>Preparing the brief</div></div>
     <div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>`;
 }
 function answerHTML(a, i) {
   if (!a) return '';
+  // Fixed ReliefGrid replies (no model output): scope notice / select-an-area prompt.
+  if (a.scope === 'out_of_scope' || a.scope === 'needs_selection') {
+    const follow = (a.followUps || []).map(f => `<button type="button" class="example-chip" data-follow="${escapeHtml(f)}">${escapeHtml(f)}</button>`).join('');
+    return `<div class="qa-a is-unanswerable"><div class="ai-label">${a.scope === 'needs_selection' ? 'Select an area first' : 'Outside ReliefGrid’s scope'}</div>
+      <div class="prose"><p>${escapeHtml(a.answer)}</p></div>${follow ? `<div class="followups">${follow}</div>` : ''}</div>`;
+  }
+  const based = (a.metricsUsed || []).length ? `<div class="based-on"><span class="based-on-label">Analysis based on</span>${a.metricsUsed.map(m => `<span class="based-on-chip">${escapeHtml(m)}</span>`).join('')}</div>` : '';
+  const directive = a.grounding?.directiveLanguage ? `<div class="ai-note ai-note-warn">ReliefGrid does not make siting or funding decisions. Treat the areas above as candidates for further investigation.</div>` : '';
   const findings = (a.keyFindings || []).map(f => `<li>${escapeHtml(f.text)}${(f.tractIds || []).length ? `<span class="finding-refs">${f.tractIds.slice(0, 6).map(g => `<button type="button" class="tract-ref" data-tract="${escapeHtml(g)}">${escapeHtml(g)}</button>`).join('')}</span>` : ''}</li>`).join('');
   const tracts = (a.mapFocus?.tractIds || []).map(g => findTractFeature(g)).filter(Boolean);
   const evidence = tracts.length ? `<div class="evidence">
-      <div class="evidence-head"><span class="section-label">Referenced areas</span><span class="muted small">Values from ReliefGrid data · ${AppState.mode === 'walk' ? 'walk' : 'drive'}</span></div>
+      <div class="evidence-head"><span class="section-label">Areas referenced</span><span class="muted small">Values from ReliefGrid data · ${AppState.mode === 'walk' ? 'walk' : 'drive'}</span></div>
       <div class="table-scroll"><table class="evidence-table"><thead><tr><th>Tract</th><th>County</th><th title="Community Need">Need</th><th title="Service Access (0–100)">Access</th><th title="Service Gap">Gap</th><th>Cluster</th></tr></thead><tbody>
       ${tracts.slice(0, 12).map(f => { const p = f.properties; const lisa = p.lisa_mismatch_index_label || 'ns';
         return `<tr data-tract="${escapeHtml(p.GEOID)}" tabindex="0"><td>${escapeHtml(p.GEOID)}</td><td>${escapeHtml(p.county_name || '—')}</td><td>${number(p.need_score)}</td><td>${number(p.access_index, 0)}</td><td>${number(p.mismatch_index)}</td><td><span class="lisa-tag lisa-${lisa}" title="${escapeHtml(LISA_LABELS[lisa] || '')}">${escapeHtml(lisa === 'ns' ? '—' : lisa)}</span></td></tr>`; }).join('')}
@@ -187,12 +198,12 @@ function answerHTML(a, i) {
   const warn = (a.grounding?.unverifiedFigures || []).length
     ? `<div class="ai-note ai-note-warn">Some figures in this answer (${a.grounding.unverifiedFigures.slice(0, 5).map(escapeHtml).join(', ')}) could not be matched to ReliefGrid’s data. Rely on the tract values shown in the table and on the map.</div>` : '';
   const follow = (a.followUps || []).length ? `<div class="followups">${a.followUps.slice(0, 3).map(f => `<button type="button" class="example-chip" data-follow="${escapeHtml(f)}">${escapeHtml(f)}</button>`).join('')}</div>` : '';
-  return `<div class="qa-a ${a.answerable === false ? 'is-unanswerable' : ''}">
-    <div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>ReliefGrid analysis</div>
+  return `<div class="qa-a ${a.scope === 'insufficient_data' ? 'is-unanswerable' : ''}">
+    <div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>${a.scope === 'insufficient_data' ? 'Not available in ReliefGrid data' : 'ReliefGrid analysis brief'}</div>
     <div class="prose">${renderProse(a.answer || '')}</div>
     ${findings ? `<ul class="findings">${findings}</ul>` : ''}
-    ${warn}${evidence}${facList}${limits}
-    <div class="ai-foot">AI-assisted analysis based on ReliefGrid data${a.meta?.sources?.length ? ` · used: ${a.meta.sources.map(escapeHtml).join(', ')}` : ''}.</div>
+    ${directive}${warn}${evidence}${facList}${limits}${based}
+    <div class="ai-foot">AI-assisted interpretation based on ReliefGrid data. Values in the table come directly from ReliefGrid’s stored analysis.</div>
     ${follow}</div>`;
 }
 function wireThread(el) {

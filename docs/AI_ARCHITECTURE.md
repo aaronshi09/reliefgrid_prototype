@@ -11,10 +11,10 @@ ReliefGrid is not a chatbot on top of a map. The language models sit **between**
      (Find Resources page)                  (Analyze Service Gaps page)
      primary: Gemini                            primary: OpenAI
             |                                           |
-   1. interpret → structured needs         model calls ReliefGrid data tools
-      (existing categories only)           (precomputed tract / LISA / resources)
-   2. ReliefGrid search in the browser      answer validated against tool output
-      (computeResults, same rules as        (ids filtered, figures checked)
+   1. interpret → structured needs         classify question (rules first)
+      (existing categories only)           retrieve ONLY relevant stored data
+   2. ReliefGrid search in the browser      one structured explanation call
+      (computeResults, same rules as        validate ids + figures vs context
        the guided flow)                             |
    3. optional: rank returned ids with      UI renders evidence from its own data
       verified reason codes (no AI text)
@@ -30,10 +30,13 @@ One provider serves each request, and requests are never sent to both. The UI do
 | --- | --- |
 | Provider, model, routing, fallback, limits (all AI config) | `server/ai/config.js` |
 | Task router (one provider per request, opt-in fallback) | `server/ai/router.js` |
-| Gemini adapter (official `@google/genai` SDK) and OpenAI adapter (REST), same interface | `server/ai/providers/gemini.js`, `openai.js` |
+| Gemini adapter (official `@google/genai` SDK) and OpenAI adapter (official `openai` SDK, Responses API), same interface | `server/ai/providers/gemini.js`, `openai.js` |
 | Navigator workflows: interpret, explain, location context | `server/ai/workflows/navigator.js` |
-| Analyst workflow: tool loop and validation | `server/ai/workflows/analyst.js` |
-| Deterministic data tools the analyst can call | `server/data/analyst-tools.js` |
+| Analyst workflow: classify → retrieve → explain → validate | `server/ai/workflows/analyst.js` |
+| Question classification (rules first, model only if undecided) | `server/analytics/classify.js` |
+| Deterministic context retrieval | `server/analytics/retrieve.js` |
+| Methodology text parsed from the Data & Methods page | `server/analytics/methodology.js` |
+| Stored-data query functions used by retrieval | `server/data/analyst-tools.js` |
 | Redaction, numeric / GEOID grounding checks | `server/ai/validate.js` |
 | HTTP wrapper (origin check, size limit, rate limit, safe errors) | `server/http.js` |
 | Endpoints | `api/ai/{status,interpret,explain,analyze,location-context}.js` |
@@ -70,25 +73,65 @@ One provider serves each request, and requests are never sent to both. The UI do
 
 ## Ask ReliefGrid (OpenAI)
 
-`POST /api/ai/analyze` runs a function-calling loop (at most 6 tool rounds, 60 s budget). The model can reach data only through these tools, which read the files the browser loads:
+**Model:** `gpt-6-luna` with `reasoning.effort: "low"`, set in one place (`server/ai/config.js`; override with `OPENAI_MODEL` / `OPENAI_REASONING_EFFORT`). ReliefGrid retrieves the data deterministically, so the model's job is only to interpret the supplied values. OpenAI's efficient tier supports that with Structured Outputs at a fraction of the cost and latency of `gpt-6-sol` or `gpt-6-astra`.
 
-| Tool | Returns |
-| --- | --- |
-| `get_study_overview` | Tract/resource counts, LISA cluster counts, global Moran's I, robustness, metric definitions |
-| `rank_tracts` | Tracts ranked by an existing metric, filterable by county / cluster |
-| `get_tract` | One tract, drive and walk values, ReliefGrid's own plain-language reading, 3 nearest listings |
-| `summarize_by_county` | Descriptive Nassau vs Suffolk comparison of existing values (labelled as such) |
-| `resource_inventory` | Listing counts by category / county |
-| `category_proximity` | Straight-line distance to the nearest listing of a category (explicitly *not* the access score) |
-| `compare_travel_modes` | Drive vs walk cluster membership |
+**SDK:** the official `openai` Node SDK, via the Responses API (`client.responses.create`). Every call uses a strict `json_schema` output, `store: false`, SDK retries disabled, and a hard deadline that ReliefGrid owns.
 
-The model returns strict JSON (`answer`, `keyFindings`, `mapFocus`, `limitations`, `followUps`). Before anything reaches the browser:
-- tract and facility ids are kept only if a tool returned them in this request and they exist in the data;
-- GEOIDs mentioned in prose that no tool returned are flagged;
-- every figure in the prose is compared with the numbers in tool output (allowing rounding and percentages), and unmatched figures are shown to the user as unverified;
-- an answer that consulted no data is rejected.
+`POST /api/ai/analyze` runs a deterministic pipeline (`server/ai/workflows/analyst.js`):
 
-The browser then highlights the referenced tracts (an illuminated outline layer), switches to the suggested existing layer or mode, and renders an evidence table whose values come from its own copy of the data, not from the model's text.
+1. **Sanitize.** At most 500 characters, control characters removed, personal identifiers redacted. Census tract GEOIDs are kept, since they are public geography.
+2. **Classify** (`server/analytics/classify.js`). Pattern families assign one or more domains: `service_gap`, `need_access`, `community_need`, `service_access`, `category_access`, `lisa`, `mode_comparison`, `resources`, `methodology`, `map_explanation`, `selected_area`, `investigation` or `overview`. They also extract parameters: travel mode, county, service category, cluster type, typed GEOID, "this area", siting intent, a named layer, and whether it's a definition-only question. Short follow-ups ("what about walking?") reuse the previous turn's domains.
+   - If the rules can't decide, one small structured call (`analyst.classify`, reasoning `none`) chooses from the same fixed list. It sees only the question text, never data.
+   - **These replies make no model call:** off-topic questions get a fixed scope message; "this area" with nothing selected asks the user to click a tract; an unknown GEOID says ReliefGrid has no such tract.
+3. **Retrieve** (`server/analytics/retrieve.js`). Only the blocks each domain needs are built from the stored files, typically 1–10 KB rather than the ~2.7 MB tract files.
+
+   | Domain | Context sent |
+   | --- | --- |
+   | `service_gap` | Top 10 tracts by stored `mismatch_index` (optionally one county) |
+   | `need_access` | Tracts in the stored HH cluster (ReliefGrid's definition of high need / low access), ranked by need, with ACS context |
+   | `community_need` / `service_access` | Top / bottom 10 by the stored value |
+   | `category_access` | Straight-line distance from HH-cluster tracts to the nearest listing of that category, plus the listing inventory |
+   | `lisa` | Stored cluster counts (both variables) and by county, Moran's I, the need–access bivariate result, example HH / LL tracts, all HL / LH tracts |
+   | `mode_comparison` | Drive vs walk cluster counts, overlap, median access, and the selected tract's values in both modes |
+   | `selected_area` | The tract's stored values (both modes), ReliefGrid's own plain-language reading, ACS fields, the six nearest tracts by centroid, and regional medians |
+   | `resources` | The nearest listings to the selected tract (straight-line), or inventory counts |
+   | `map_explanation` | The named or current layer: stored-value distribution plus highest / lowest tracts (or the cluster summary) |
+   | `methodology` | The Data & Methods text parsed from `index.html` at runtime, plus the LISA settings from `diagnostics_*.json` |
+   | `investigation` | Need / access clusters, plus category proximity if a service is named |
+
+4. **Explain.** One structured call returns `status` (`answered` / `insufficient_data`), `answer`, `keyFindings[{text, tractIds, facilityIds}]`, `referencedTractIds`, `referencedFacilityIds`, `suggestedLayer`, `limitations` and `followUps`. The system prompt forbids values that aren't in the context, restricts methodology to the documented text, and requires decision-support wording ("may warrant further investigation").
+5. **Validate.**
+   - Ids are kept only if they appear in the retrieved context.
+   - Every figure in the prose is compared with the context numbers, allowing for rounding and percentages; unmatched figures are shown as unverified.
+   - Tract ids in the prose that aren't in the context are flagged.
+   - Directive siting language ("the county should build…") is flagged, and siting questions always get a fixed limitation about zoning, funding, land, capacity, community input, legal requirements and feasibility.
+   - A layer the user names always wins over the model's suggestion.
+
+**Response to the browser:**
+
+```jsonc
+{
+  "ok": true,
+  "scope": "answered" | "insufficient_data" | "out_of_scope" | "needs_selection",
+  "answer": "…",
+  "keyFindings": [{ "text": "…", "tractIds": ["36103190605"], "facilityIds": [] }],
+  "areas": [{ "geoid": "36103190605", "county": "Suffolk", "role": "selected" | "referenced" }],
+  "mapFocus": { "tractIds": [], "facilityIds": [], "layer": "mismatch_index", "mode": "drive" },
+  "metricsUsed": ["Drive catchments", "Service Gap", "Community Need", "Service Access (E2SFCA)"],
+  "domains": ["service_gap"],
+  "limitations": ["…"],
+  "followUps": ["…"],
+  "grounding": { "unverifiedFigures": [], "directiveLanguage": false },
+  "meta": { "task": "analyst.answer", "classifiedBy": "rules" | "model", "provider": "openai", "fallbackUsed": false }
+}
+```
+
+**Map sync** (`js/ai/analyst.js`, reusing existing layers only):
+- `mapFocus.layer` switches the existing research layer (radio + `setMapLayer`), and `mapFocus.mode` switches drive / walk if the question named one.
+- `tractIds` feed the existing `tract-ai-*` outline layers (a filter on the existing `tracts` source; no new polygons), and the map fits to them.
+- Referenced facilities are emphasised on the existing `facilities` layer, and only those are shown unless the user has turned all resources on.
+- Clicking an evidence row or tract chip selects that tract with the existing selected-outline layer and opens its existing metric panel.
+- "Analysis based on" lists `metricsUsed`, which comes from the retrieval step, not from the model.
 
 ## Fallback
 
