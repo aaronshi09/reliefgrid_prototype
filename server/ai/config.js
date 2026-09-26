@@ -27,6 +27,7 @@
  * ==========================================================================*/
 const env = (k, d = '') => (process.env[k] ?? d).toString().trim();
 const flag = (k) => env(k).toLowerCase() === 'true';
+const DEFAULT_ALLOWED_ORIGINS = ['https://aaronshi09.github.io'];
 
 export function aiConfig() {
   return {
@@ -67,7 +68,9 @@ export function aiConfig() {
 
     allowFallback: flag('AI_ALLOW_FALLBACK'),
     mapsGrounding: flag('GEMINI_MAPS_GROUNDING'),
-    allowedOrigins: env('AI_ALLOWED_ORIGINS').split(',').map(s => s.trim()).filter(Boolean),
+    // Cross-origin callers allowed to use this backend. The GitHub Pages copy of
+    // the site (static only) calls the Vercel API; extend with AI_ALLOWED_ORIGINS.
+    allowedOrigins: [...new Set([...DEFAULT_ALLOWED_ORIGINS, ...env('AI_ALLOWED_ORIGINS').split(',').map(s => s.trim()).filter(Boolean)])],
     // Each Find Help search uses up to 2 requests; people at a demo often share one IP.
     rateLimitPerMin: Number(env('AI_RATE_LIMIT_PER_MIN', '40')) || 40,
 

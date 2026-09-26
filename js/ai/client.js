@@ -25,27 +25,31 @@ export class AIClientError extends Error {
 }
 
 /* ── Status (is the backend reachable / which features are configured) ── */
-let status = { checked: false, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [] };
+let status = { checked: false, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [], reason: null };
 let statusPromise = null;
 
 export function getAIStatus() { return status; }
+async function fetchStatusOnce() {
+  let r;
+  try { r = await timedFetch(url('status'), { method: 'GET' }, AI_CLIENT_CONFIG.timeoutsMs.status); }
+  catch (e) { return { reason: e && e.name === 'AbortError' ? 'timeout' : 'network' }; }
+  if (!r.ok) return { reason: `http_${r.status}` };
+  try { return { json: await r.json() }; } catch (_) { return { reason: 'not_json' }; }
+}
 export function loadAIStatus() {
   if (statusPromise) return statusPromise;
   statusPromise = (async () => {
-    try {
-      const r = await timedFetch(url('status'), { method: 'GET' }, AI_CLIENT_CONFIG.timeoutsMs.status);
-      if (!r.ok) throw new Error(String(r.status));
-      const j = await r.json();
-      status = {
-        checked: true, reachable: true,
-        navigator: !!j?.features?.navigator, analyst: !!j?.features?.analyst,
-        locationContext: !!j?.features?.locationContext,
-        missing: Array.isArray(j?.setup?.missing) ? j.setup.missing.filter(s => /^[A-Z_]+$/.test(s)) : [],
-      };
-    } catch (_) {
-      // No backend (e.g. static hosting) — AI surfaces show a setup notice.
-      status = { checked: true, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [] };
-    }
+    let res = await fetchStatusOnce();
+    // One retry for transient failures (e.g. a serverless cold start).
+    if (!res.json && ['timeout', 'network', 'http_502', 'http_503', 'http_504'].includes(res.reason)) res = await fetchStatusOnce();
+    const j = res.json;
+    status = j ? {
+      checked: true, reachable: true,
+      navigator: !!j?.features?.navigator, analyst: !!j?.features?.analyst,
+      locationContext: !!j?.features?.locationContext,
+      missing: Array.isArray(j?.setup?.missing) ? j.setup.missing.filter(s => /^[A-Z_]+$/.test(s)) : [],
+      reason: null,
+    } : { checked: true, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [], reason: res.reason };
     document.dispatchEvent(new CustomEvent('rg:ai-status', { detail: status }));
     return status;
   })();
@@ -58,7 +62,9 @@ function url(key) { return AI_CLIENT_CONFIG.apiBase + AI_CLIENT_CONFIG.endpoints
 async function timedFetch(u, init, ms) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
-  try { return await fetch(u, { ...init, signal: ctrl.signal, credentials: 'omit' }); }
+  // 'same-origin' lets Vercel Deployment Protection cookies reach /api on
+  // protected preview URLs; cross-origin backends still receive no cookies.
+  try { return await fetch(u, { ...init, signal: ctrl.signal, credentials: 'same-origin' }); }
   finally { clearTimeout(timer); }
 }
 
@@ -117,8 +123,15 @@ function bold(s) { return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
 export function setupNoticeHTML(feature) {
   const s = status;
   const envName = feature === 'analyst' ? 'OPENAI_API_KEY' : 'GEMINI_API_KEY';
+  const target = esc(AI_CLIENT_CONFIG.apiBase || location.origin) + AI_CLIENT_CONFIG.endpoints.status;
+  const why = {
+    http_404: 'returned 404 — this host serves only static files (e.g. GitHub Pages) or the api/ functions are not deployed',
+    http_401: 'returned 401 — the deployment is protected (Vercel Deployment Protection); open the production URL or sign in',
+    http_403: 'returned 403 — the backend does not allow this origin (add it to AI_ALLOWED_ORIGINS)',
+    timeout: 'timed out', network: 'could not be reached (network or CORS error)', not_json: 'did not return JSON',
+  }[s.reason] || (s.reason ? `failed (${esc(s.reason)})` : 'failed');
   const dev = !s.reachable
-    ? `No ReliefGrid AI backend was found for this page. Run <code>npm run dev</code> locally, or deploy the <code>api/</code> functions (see README).`
+    ? `No ReliefGrid AI backend was found for this page: <code>${target}</code> ${why}. Run <code>npm run dev</code> locally, or use the Vercel deployment (see README).`
     : `Set <code>${envName}</code> in the server environment to enable it (see README).`;
   return `<div class="ai-setup" role="note"><div class="ai-setup-title"><span class="ai-spark" aria-hidden="true"></span>AI assistance is not available here</div>
     <div class="ai-setup-body">${feature === 'analyst' ? 'All maps, layers and tract details on this page still work.' : 'You can still browse by category, use your location, and filter results below.'}</div>

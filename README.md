@@ -120,6 +120,7 @@ In the browser: **Analyze Service Gaps → Ask ReliefGrid**, try the suggested q
 5. Confirm keys are not exposed: view the page source and the network responses for `/api/ai/*` — neither key ever appears (each is only sent server-to-provider in a request header).
 
 **Split hosting (for example, keep GitHub Pages for the site).**
+The GitHub Pages copy at `aaronshi09.github.io/reliefgrid_prototype` is already wired this way: `js/ai/config.js` points that host at `https://reliefgrid-prototype.vercel.app`, and the server allows that origin by default (`DEFAULT_ALLOWED_ORIGINS` in `server/ai/config.js`). If the AI panel ever says no backend was found, open *For developers* — it names the URL checked and why it failed (404 = static-only host, 401 = Vercel Deployment Protection, 403 = origin not allowed).
 1. Deploy this repository to Vercel as above (it serves `/api/ai/*`).
 2. In the Pages copy of `index.html`, set `<meta name="reliefgrid-api-base" content="https://your-app.vercel.app">`.
 3. On the backend, set `AI_ALLOWED_ORIGINS=https://<you>.github.io`.
