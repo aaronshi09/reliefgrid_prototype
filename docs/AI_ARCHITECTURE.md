@@ -16,7 +16,8 @@ ReliefGrid is not a chatbot on top of a map. The language models sit **between**
    2. ReliefGrid search in the browser      answer validated against tool output
       (computeResults, same rules as        (ids filtered, figures checked)
        the guided flow)                             |
-   3. optional: explain returned ids        UI renders evidence from its own data
+   3. optional: rank returned ids with      UI renders evidence from its own data
+      verified reason codes (no AI text)
             \                                      /
                     RELIEFGRID RESPONSE + MAP SYNC
 ```
@@ -29,7 +30,7 @@ One provider serves each request, and requests are never sent to both. The UI do
 | --- | --- |
 | Provider, model, routing, fallback, limits (all AI config) | `server/ai/config.js` |
 | Task router (one provider per request, opt-in fallback) | `server/ai/router.js` |
-| Gemini / OpenAI adapters (plain `fetch`, same interface) | `server/ai/providers/gemini.js`, `openai.js` |
+| Gemini adapter (official `@google/genai` SDK) and OpenAI adapter (REST), same interface | `server/ai/providers/gemini.js`, `openai.js` |
 | Navigator workflows: interpret, explain, location context | `server/ai/workflows/navigator.js` |
 | Analyst workflow: tool loop and validation | `server/ai/workflows/analyst.js` |
 | Deterministic data tools the analyst can call | `server/data/analyst-tools.js` |
@@ -43,15 +44,28 @@ One provider serves each request, and requests are never sent to both. The UI do
 
 ## Resource Navigator (Gemini)
 
-1. **Interpret** (`POST /api/ai/interpret`). The request text (≤ 600 characters, with phone numbers, emails and ID-like numbers stripped in the browser *and* on the server) goes to Gemini with a strict JSON schema. The allowed categories are the eight existing Find Help categories from `js/core/taxonomy.js`. The server re-validates every field: unknown categories are dropped, and a street address is never accepted as a location.
-2. **Retrieve** (browser). `applySeekerPlan()` in `js/seeker.js` maps needs onto the *existing* filters, using the same rules as the rule-based guided flow:
-   - "needed now" → *Open now*
-   - walking / no car → the guided flow's travel radii
-   - walk-ins → only for categories whose data models it
-   - the same relaxation safety net when nothing matches
+**Model:** `gemini-3.5-flash-lite` by default, set in one place (`server/ai/config.js`, overridable with `GEMINI_MODEL`). It is Google's fastest, lowest-cost current Gemini model, and it supports strict JSON-schema output. That fits short, latency-sensitive interpretation calls; the larger Flash/Pro models add cost and latency without benefit here. (`gemini-2.5-flash` is deprecated with limited access.)
 
-   Results come from `computeResults()` over `longisland_facilities.geojson`. Needs with no matching category ("childcare") and household details are shown honestly, not used to invent matches.
-3. **Explain** (`POST /api/ai/explain`, optional). The browser sends only the **ids** of the top results, plus their already-displayed availability status and distance. The server looks up every other fact in the dataset. The model may reference only those ids; anything else is removed, and a summary containing contact details or links is rejected.
+**SDK:** the official `@google/genai` SDK, via the Interactions API (`client.interactions.create`) with a JSON-schema `response_format`. Requests are sent with `store: false`, so Google does not keep them for later retrieval. ReliefGrid enforces its own hard deadline on every call and disables SDK retries.
+
+1. **Interpret** (`POST /api/ai/interpret`). The request text (≤ 600 characters, with phone numbers, emails and ID-like numbers stripped in the browser *and* on the server) goes to Gemini with this schema, designed from the dataset and the existing Find Help logic:
+
+   | Field | Values | Maps onto (existing ReliefGrid logic) |
+   | --- | --- | --- |
+   | `requestType` | `service_request` / `unclear` / `unrelated` | Only `service_request` triggers a search; the other two get a clarifying question or a scope message plus category buttons |
+   | `categories` | the 8 Find Help ids: `shelter`, `food`, `health`, `behavioral_health`, `legal`, `housing_support`, `outreach`, `other` | `SEEKER_CATEGORIES` → `resource_group` values in `longisland_facilities.geojson` (`other` = `public_benefits` + `other`) |
+   | `urgency` | `immediate` / `soon` / `planning` / `unspecified` | `immediate` → the existing **Open now** filter |
+   | `transportation` | `no_car` / `walking` / `public_transit` / `driving` / `unspecified` | The guided flow's radii (walking 2.5 km, no car / transit 12 km, driving 24 km), applied only when a location is known |
+   | `walkInsNeeded` | boolean | The **Walk-ins** filter, only for healthcare, mental health and legal (the only data that models walk-ins) |
+   | `locationText` | town name or `""` | The existing prototype town lookup (`lookupTown`); street addresses are rejected |
+   | `householdContext` | `children`, `family`, `older_adult`, `disability`, `veteran`, `youth`, `pets` | Shown as info chips only. The data has **no eligibility fields**, so these never filter results |
+   | `unmatchedNeeds` | short labels | Shown as "ReliefGrid doesn't have a category for …" |
+   | `clarifyingQuestion` | text or `""` | Shown only for `unclear` requests |
+   | `safetyConcern` | boolean | Shows the 911 / 988 notice |
+
+   The server re-validates every field against these lists. Unknown values and extra fields are discarded, and model-written text (the clarifying question, unmatched needs) is dropped if it contains digits, links or addresses. That way Gemini can't smuggle in a resource name, phone number or address.
+2. **Retrieve** (browser). `applySeekerPlan()` in `js/seeker.js` applies the needs through the same rules as the rule-based guided flow, including its relaxation safety net: when nothing matches, it loosens walk-ins, then distance, then open now, and tells the user it did. The quick-filter buttons reflect the result. Results come from `computeResults()` over the dataset; nothing else can add a resource. Matching markers are the existing `facilities` layer, filtered to the results. Selecting a result, or a suggested first call, sets the existing marker's `selected` state and flies to it. If nothing matches, the panel says so and offers to remove filters, drop the location, or start a new search. It never asks the model for alternatives.
+3. **Suggest first calls** (`POST /api/ai/explain`, optional). The browser sends only the top result **ids**, plus the availability status, open-now, walk-ins and distance it already displays. The server looks up all other facts. Gemini returns only `{ facilityId, reasons[] }`, where reasons come from a fixed list (`matches_need`, `closest`, `listed_available`, `listed_open`, `walk_ins`, `mentions_families`). The server drops ids ReliefGrid didn't return and reason codes the data doesn't support, and the browser re-checks the ids. **Gemini writes no text about resources:** every displayed word comes from ReliefGrid templates and data.
 4. **Location context** (`POST /api/ai/location-context`, off by default). This uses Gemini's Google Maps grounding for one listing, based on the listing's coordinates, never the user's. It is rendered as *External · Google Maps*, separate from ReliefGrid's listing, with its sources.
 
 ## Ask ReliefGrid (OpenAI)

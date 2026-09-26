@@ -15,7 +15,7 @@
  * ==========================================================================*/
 import { AppState, Availability, loadAll, initMap, initMapLayers, enrichFacilitiesWithAvailability, pushFacilitiesToMap } from './js/shared.js';
 import { initGov, navigateGov, openGovDetail, GOV_PAGES, GOV_MAP_PAGES } from './js/gov.js';
-import { initSeeker, navigateSeeker, openSeekerDetail, SEEKER_PAGES, SEEKER_MAP_PAGES, getSavedCount } from './js/seeker.js';
+import { initSeeker, navigateSeeker, onSeekerMarkerClick, SEEKER_PAGES, SEEKER_MAP_PAGES, getSavedCount } from './js/seeker.js';
 import { loadAIStatus } from './js/ai/client.js';
 import { initNavigator } from './js/ai/navigator.js';
 import { initAnalyst } from './js/ai/analyst.js';
@@ -129,7 +129,7 @@ function wireGovDetailBridge() {
   document.addEventListener('rg:facility-click', (e) => {
     const id = e.detail?.facilityId; if (!id) return;
     if (AppState.shell === 'gov') openGovDetail(id);
-    else if (AppState.shell === 'seeker') openSeekerDetail(id);
+    else if (AppState.shell === 'seeker') onSeekerMarkerClick(id);
   });
 }
 

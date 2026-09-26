@@ -17,9 +17,9 @@ ReliefGrid's own data is the source of truth. AI only **interprets** requests an
 
 - **Visual redesign.** A dark navy design system (all tokens in `:root` of `style.css`), glass panels floating over a full-bleed map, a restyled dark basemap (Carto Dark Matter re-tinted in `applyBasemapTheme`), new compact category markers with a hover / selected / AI-match halo, dark-appropriate data ramps and legends, bottom sheets on mobile, reduced-motion support.
 - **Navigation.** A "Find Resources / Analyze Service Gaps" mode switch; every existing page is kept.
-- **AI Resource Navigator** (Find Help page) with editable "Needs identified" chips and an optional grounded summary.
+- **AI Resource Navigator** (Find Help page), powered by Gemini through the official `@google/genai` SDK: it interprets a request into ReliefGrid's existing categories and filters, shows editable "Needs identified" chips, and can suggest first calls. Suggestions are chosen only from ReliefGrid's own results, with reasons verified against the data.
 - **Ask ReliefGrid** (new dashboard page) with an evidence table, map highlighting, and an "Ask about this area" hand-off from Service Gaps.
-- **Backend** (`api/`, `server/`): a provider-agnostic AI layer with task routing, optional fallback, input limits, rate limiting and grounding checks. It has no npm dependencies.
+- **Backend** (`api/`, `server/`): a provider-agnostic AI layer with task routing, optional fallback, input limits, rate limiting and grounding checks. Gemini calls use `@google/genai` (the only dependency); OpenAI calls use its REST API.
 - **Shared pure core** (`js/core/`): the taxonomy and interpretation helpers are now used by both the browser and the server, so the AI reads exactly what the UI shows.
 - **Unchanged:** every data file, schema and research value (need, access, gap, LISA, Moran's I), the availability service and its demo data, and the provider portal. The only data-handling additions are *display* safeguards (for example, ACS "not available" sentinels are shown as missing).
 - **Small fixes found while testing:**
@@ -29,10 +29,11 @@ ReliefGrid's own data is the source of truth. AI only **interprets** requests an
 
 ## 2. Running locally
 
-Requirements: **Node.js 18.17+** (no `npm install` needed; there are no dependencies).
+Requirements: **Node.js 20+**. The only dependency is Google's official Gen AI SDK (`@google/genai`).
 
 ```bash
-cp .env.example .env        # then edit .env — see §3 (optional: the app runs without keys)
+npm install                 # installs @google/genai
+cp .env.example .env        # then add GEMINI_API_KEY — see §3 (the app also runs without keys)
 npm run dev                 # http://localhost:8787
 npm run check               # offline tests of the AI grounding rules (no keys, no network)
 ```
@@ -41,26 +42,57 @@ npm run check               # offline tests of the AI grounding rules (no keys, 
 
 > Opening `index.html` directly from disk won't work (browsers block `fetch` of local files). Any static server works for the non-AI app; the AI features need the Node server or a deployed backend.
 
+### Testing the Resource Navigator API locally
+
+With `GEMINI_API_KEY` in `.env` and `npm run dev` running:
+
+```bash
+# 1. Is the navigator enabled? (never returns the key)
+curl http://localhost:8787/api/ai/status
+#  → {"ok":true,"features":{"navigator":true,...},"setup":{"missing":[...]}}
+
+# 2. Interpret a request (structured needs only — no resources)
+curl -X POST http://localhost:8787/api/ai/interpret \
+  -H "Content-Type: application/json" \
+  -d '{"text":"I need somewhere to sleep tonight and I don'\''t have a car"}'
+#  → {"ok":true,"needs":{"requestType":"service_request","categories":["shelter"],
+#      "urgency":"immediate","transportation":"no_car",...},"meta":{...}}
+
+# 3. Off-topic input is recognised, never searched
+curl -X POST http://localhost:8787/api/ai/interpret -H "Content-Type: application/json" \
+  -d '{"text":"Write me an essay about George Washington."}'
+#  → "requestType":"unrelated","categories":[]
+```
+
+Then open http://localhost:8787 → **Find Resources** and try the examples in the input box. Failures are returned as a short code (`not_configured`, `rate_limited`, `unavailable`, `timeout`, `bad_output`, `blocked`); the server log shows the provider status, never the request text.
+
 ## 3. Configuration (environment variables)
 
 | Variable | Required for | Notes |
 | --- | --- | --- |
 | `GEMINI_API_KEY` | Resource Navigator | Get one at Google AI Studio. |
 | `OPENAI_API_KEY` | Ask ReliefGrid | Get one from the OpenAI platform dashboard. |
-| `GEMINI_MODEL` / `OPENAI_MODEL` | — | Defaults `gemini-2.5-flash` / `gpt-5-mini`. |
+| `GEMINI_MODEL` / `OPENAI_MODEL` | — | Defaults `gemini-3.5-flash-lite` / `gpt-5-mini` (set only in `server/ai/config.js`). |
+| `GEMINI_THINKING_LEVEL` | — | Optional `minimal`/`low`/`medium`/`high`; unset uses the model default. |
 | `AI_ALLOW_FALLBACK` | — | `true` lets a task retry once on the other provider when the primary is unavailable (same data, same tools). Default off. |
 | `GEMINI_MAPS_GROUNDING` | — | `true` enables optional Google Maps travel/area context on resource detail pages. Default off. |
 | `AI_ALLOWED_ORIGINS` | split hosting | Comma-separated origins allowed to call the API cross-origin. |
-| `AI_RATE_LIMIT_PER_MIN` | — | Per-IP budget (default 20; best-effort, per instance). |
+| `AI_RATE_LIMIT_PER_MIN` | — | Per-IP budget (default 40; best-effort, per instance). |
 
 **Setting keys locally:** put them in `.env` (git-ignored). **In production:** set them as environment variables / secrets in your host's dashboard. Never put keys in `index.html`, `js/`, or any committed file. The browser never receives a key; `/api/ai/status` reports only which features are enabled.
 
 ## 4. Deploying
 
 **Recommended: Vercel (static site and functions from one repo).**
-1. Import the repository in Vercel (framework preset: *Other*; no build command; output directory: root).
-2. Add `GEMINI_API_KEY` and `OPENAI_API_KEY` under *Settings → Environment Variables*.
-3. Deploy. `vercel.json` bundles the data files the analyst tools read and sets a 60 s function limit.
+1. Import the repository in Vercel (framework preset: *Other*; no build command; output directory: root). Vercel installs `@google/genai` from `package.json` automatically; the Node.js runtime must be 20.x or newer (the current default).
+2. Add `GEMINI_API_KEY` (and `OPENAI_API_KEY` for Ask ReliefGrid) under *Settings → Environment Variables*, for the Production environment.
+3. Deploy (environment-variable changes only apply to deployments made **after** the change — redeploy if the key was added later). `vercel.json` bundles the data files the analyst tools read and sets a 60 s function limit.
+
+**Verifying a production deployment**
+1. `curl https://<your-app>.vercel.app/api/ai/status` → `"navigator":true`. If it is `false`, the key isn't visible to the deployment: check the variable's environment scope and redeploy.
+2. `curl -X POST https://<your-app>.vercel.app/api/ai/interpret -H "Content-Type: application/json" -d '{"text":"I need food"}'` → `"categories":["food"]`. An error code such as `unavailable` means the call reached Gemini but failed — open *Vercel → Deployments → Functions/Logs*: the log line names the provider status (for example `404 (check GEMINI_MODEL)` or `401/403` for an invalid key) without any user text.
+3. In the browser, run the example requests on **Find Resources** and confirm the "Needs identified" chips, the map update, and that every card is a normal ReliefGrid listing.
+4. Confirm the key is not exposed: view the page source and the network responses for `/api/ai/*` — the key never appears (it is only sent server-to-Google in a request header).
 
 **Split hosting (for example, keep GitHub Pages for the site).**
 1. Deploy this repository to Vercel as above (it serves `/api/ai/*`).
@@ -87,4 +119,4 @@ With no keys (or no backend), the AI inputs are disabled and a short setup notic
 - **Numeric grounding is a heuristic.** It catches figures that match no tool value and flags them to the user, but it cannot prove every sentence is correct. The evidence table is always rendered from ReliefGrid's own data.
 - Rate limiting is per serverless instance. Use your host's WAF / edge rate limits for production.
 - **Google Maps grounding** is optional and off by default, and its request shape follows the Gemini API as documented at the time of writing. Verify it against the current docs before relying on it.
-- The live providers were tested with **mocked HTTP responses** (`npm run check`, plus browser tests). Run a smoke test with real keys before a demo.
+- **Tested without a live key.** The live providers were tested with **mocked responses** that follow the SDK's request and response formats (`npm run check`, plus browser tests of every example request). Run the checks in "Verifying a production deployment" once against the real key.

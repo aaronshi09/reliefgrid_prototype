@@ -7,14 +7,15 @@
  *     → applySeekerPlan()        (ReliefGrid's own computeResults() over the
  *                                 verified facility dataset — same rules as
  *                                 the guided flow, same relaxation safety net)
- *     → POST /api/ai/explain     (optional: AI explains ONLY the resources
- *                                 ReliefGrid returned, by id)
- * The language model never produces a resource. If it names something that
- * isn't in the result set, the server drops it before it reaches the page.
+ *     → POST /api/ai/explain     (optional "suggested first calls": the AI
+ *                                 picks among the ids ReliefGrid returned and
+ *                                 reason codes the server verifies; all text
+ *                                 shown is rendered here from ReliefGrid data)
+ * The language model never produces a resource or any resource text.
  * ==========================================================================*/
 import {
   Availability, SEEKER_CATEGORIES, lookupTown, findFacilityFeature, escapeHtml, kmToMiles, haversineKm,
-  availabilityHeadline, setFacilityEmphasis,
+  setFacilityEmphasis,
 } from '../shared.js';
 import {
   applySeekerPlan, updateSeekerQuery, onSeekerResultsRendered, setSeekerLocation, getSeekerQuery,
@@ -86,7 +87,7 @@ function setStatus(html, kind = 'info') {
   el.hidden = !html;
 }
 function progressHTML(step) {
-  const steps = ['Understanding your request', 'Searching ReliefGrid listings', 'Preparing results'];
+  const steps = ['Understanding your needs…', 'Searching verified ReliefGrid resources…'];
   return `<div class="ai-progress">${steps.map((s, i) => `<div class="ai-step ${i < step ? 'done' : i === step ? 'active' : ''}"><span class="ai-step-dot" aria-hidden="true"></span>${escapeHtml(s)}</div>`).join('')}</div>`;
 }
 
@@ -111,20 +112,22 @@ async function submit(raw) {
     return;
   }
 
+  // Off-topic or too vague: never search, never guess — ask, and offer categories.
+  if (needs.requestType !== 'service_request' || !needs.categories.length) {
+    busy = false; setBusyUI(false);
+    setStatus(clarifyHTML(needs), 'warn');
+    wireClarify();
+    return;
+  }
+
   setStatus(progressHTML(1));
+  await nextFrame(); // let the "searching" stage paint before the (synchronous) search runs
   // Location: only the prototype town lookup — no geocoding service is used.
   let locationNote = null;
   if (needs.locationText) {
     const coords = lookupTown(needs.locationText);
     if (coords) setSeekerLocation(coords, titleCase(needs.locationText));
     else locationNote = `ReliefGrid’s prototype doesn’t recognize “${needs.locationText}” as a Long Island town yet, so results aren’t sorted by distance. You can set a town below.`;
-  }
-
-  if (!needs.categories.length) {
-    busy = false; setBusyUI(false);
-    setStatus(clarifyHTML(needs), 'warn');
-    wireClarify();
-    return;
   }
 
   const travel = travelFor(needs.transportation);
@@ -134,7 +137,7 @@ async function submit(raw) {
     walkIns: !!needs.walkInsNeeded,
     travel,
   };
-  session = { needs, plan, locationNote, relaxed: [], summary: null, picks: [], summaryState: 'idle', resultKey: '', hideHousehold: false };
+  session = { needs, plan, locationNote, relaxed: [], picks: [], summaryState: 'idle', resultKey: '', hiddenHousehold: new Set() };
   session.relaxed = applySeekerPlan(plan);   // → navigates to results → onResults()
   busy = false; setBusyUI(false);
   setStatus('');
@@ -153,12 +156,15 @@ function travelFor(t) {
   return null;
 }
 function titleCase(s) { return String(s).replace(/\b\w/g, c => c.toUpperCase()); }
+function nextFrame() { return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); }
 function errorHTML(e) {
   const msg = e instanceof AIClientError ? e.userMessage : 'Something went wrong with AI assistance. Please try again.';
   return `<div class="ai-error"><strong>${escapeHtml(msg)}</strong><span>You can still choose a category below — all listings and filters work without AI.</span></div>`;
 }
 function clarifyHTML(needs) {
-  const q = needs.clarifyingQuestion || 'Could you tell us a bit more about what kind of help you need?';
+  const q = needs.requestType === 'unrelated'
+    ? 'ReliefGrid’s navigator can only help you find social services on Long Island — like shelter, food, healthcare or legal help. What kind of help are you looking for?'
+    : (needs.clarifyingQuestion || 'Could you tell us a bit more about what kind of help you need?');
   const unmatched = (needs.unmatchedNeeds || []).length
     ? `<p class="small">ReliefGrid’s listings don’t include a category for: ${needs.unmatchedNeeds.map(escapeHtml).join(', ')}.</p>` : '';
   return `<div class="ai-clarify"><strong>${escapeHtml(q)}</strong>${unmatched}
@@ -171,7 +177,20 @@ function wireClarify() {
   }));
 }
 
-/* ── Results decoration (needs chips, notes, AI summary) ──────────────── */
+/* ── Results decoration (needs chips, notes, suggestions) ─────────────── */
+const HOUSEHOLD_LABEL = { children: 'Children with you', family: 'Family', older_adult: 'Older adult', disability: 'Disability', veteran: 'Veteran', youth: 'Youth', pets: 'Pets' };
+const CAT_BY_GROUP = Object.fromEntries(SEEKER_CATEGORIES.flatMap(c => c.groups.map(g => [g, c.label])));
+// Every word shown about a resource comes from these templates + ReliefGrid data;
+// the AI only picks which listing ids and which verified reason codes apply.
+const REASON_TEXT = {
+  matches_need: (f) => `Matches: ${CAT_BY_GROUP[f.properties.resource_group] || 'your needs'}`,
+  closest: (f, d) => (d != null ? `Closest match · ${d.toFixed(1)} mi straight-line` : 'Closest match'),
+  listed_available: () => 'Listed as available (demo data)',
+  listed_open: () => 'Listed as open now (demo data)',
+  walk_ins: () => 'Listing shows walk-ins accepted (demo data)',
+  mentions_families: () => 'Listing mentions families or youth',
+};
+
 function onResults(results, query) {
   lastResults = results;
   const box = $('seeker-ai-context'); if (!box) return;
@@ -183,7 +202,7 @@ function onResults(results, query) {
   const key = results.map(r => r.f.properties.facility_id).slice(0, AI_CLIENT_CONFIG.limits.explainResources).join('|');
   if (session.summaryState === 'done' && key !== session.resultKey) session.summaryState = 'stale';
   box.hidden = false;
-  box.innerHTML = needsHTML(query) + notesHTML(query, results) + summaryHTML(results);
+  box.innerHTML = needsHTML(query) + notesHTML(query, results) + summaryHTML(results, query);
   wireContext(box, results);
   const visible = new Set(results.map(r => r.f.properties.facility_id));
   const picks = session.summaryState === 'done' ? session.picks.map(p => p.facilityId).filter(id => visible.has(id)) : [];
@@ -207,7 +226,8 @@ function needsHTML(q) {
   }
   if (q.quickFilters.includes('walk_ins')) chips.push(chip('Walk-ins accepted', { remove: 'filter:walk_ins', kind: 'filter' }));
   if (q.userCoords) chips.push(chip(`Near ${q.locationLabel}`, { remove: 'location', kind: 'filter' }));
-  if (n.household?.children && !session.hideHousehold) chips.push(chip('Children with you', { remove: 'household', kind: 'info', title: 'ReliefGrid does not have verified family-eligibility data — ask the provider' }));
+  (n.householdContext || []).filter(h => !session.hiddenHousehold.has(h) && HOUSEHOLD_LABEL[h]).forEach(h =>
+    chips.push(chip(HOUSEHOLD_LABEL[h], { remove: `household:${h}`, kind: 'info', title: 'Not used to filter — ReliefGrid has no verified eligibility data. Ask the provider.' })));
 
   const used = new Set(q.categories || []);
   const addable = SEEKER_CATEGORIES.filter(c => !used.has(c.id));
@@ -216,6 +236,7 @@ function needsHTML(q) {
   return `<div class="ai-needs" aria-label="Needs identified">
     <div class="ai-needs-head"><span class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Needs identified</span><button type="button" class="link-btn" id="ai-edit-request">Edit request</button></div>
     <div class="chip-row">${chips.join('')}${addSelect}</div>
+    <div class="ai-foot">AI helps interpret your request. Resource information comes from ReliefGrid data.</div>
   </div>`;
 }
 function chip(label, { remove = null, kind = 'need', title = '' } = {}) {
@@ -230,27 +251,38 @@ function notesHTML(q, results) {
   const unmatched = session.needs.unmatchedNeeds || [];
   if (unmatched.length) notes.push(`<div class="ai-note">ReliefGrid’s listings don’t have a category for ${unmatched.map(u => `“${escapeHtml(u)}”`).join(', ')}. The listings below cover the needs it could match.</div>`);
   if (session.plan.walkIns && !(q.categories || []).some(c => WALKIN_RELEVANT_CATEGORIES.has(c))) notes.push(`<div class="ai-note">Walk-in information is only tracked for healthcare, mental-health and legal listings.</div>`);
-  if (!results.length) notes.push(`<div class="ai-note">No listings match right now. Try removing a need above or browse all categories.</div>`);
+  if (!results.length) {
+    const opts = [
+      q.quickFilters.length ? '<button type="button" class="chip-btn" data-broaden="filters">Remove filters</button>' : '',
+      q.userCoords ? '<button type="button" class="chip-btn" data-broaden="location">Search all of Long Island</button>' : '',
+      '<button type="button" class="chip-btn" data-broaden="all">Start a new search</button>',
+    ].join('');
+    notes.push(`<div class="ai-note ai-note-warn"><strong>No verified ReliefGrid listings match these needs right now.</strong> ReliefGrid only shows listings it actually has. Try broadening your search:<div class="clarify-cats">${opts}</div></div>`);
+  }
   return notes.join('');
 }
-function summaryHTML(results) {
-  const foot = `<div class="ai-foot">AI-assisted summary of ReliefGrid listings. Availability is demo data — always confirm with the provider.</div>`;
+function summaryHTML(results, q) {
   if (!results.length) return '';
+  const foot = `<div class="ai-foot">AI helps order these suggestions; every detail comes from ReliefGrid data. Availability is demo data — always call ahead to confirm.</div>`;
+  const available = results.filter(r => r.rec && r.rec.status === 'available').length;
+  const lead = `${results.length} ReliefGrid ${results.length === 1 ? 'listing matches' : 'listings match'}${q.userCoords ? ` near ${escapeHtml(q.locationLabel)}` : ''}${available ? ` · ${available} listed as available (demo data)` : ''}.`;
   switch (session.summaryState) {
     case 'loading':
-      return `<div class="ai-summary is-loading" aria-busy="true"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Summarizing your matches…</div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>`;
+      return `<div class="ai-summary is-loading" aria-busy="true"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Choosing good first calls…</div><p>${lead}</p><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>`;
     case 'done': {
       const picks = session.picks.map(p => {
         const f = findFacilityFeature(p.facilityId); if (!f) return '';
-        return `<li><button type="button" class="pick-btn" data-pick="${escapeHtml(p.facilityId)}"><span class="pick-name">${escapeHtml(f.properties.name)}</span><span class="pick-reason">${escapeHtml(p.reason)}</span></button></li>`;
+        const d = q.userCoords ? kmToMiles(haversineKm(q.userCoords[0], q.userCoords[1], f.geometry.coordinates[0], f.geometry.coordinates[1])) : null;
+        const reasons = p.reasons.map(code => REASON_TEXT[code]?.(f, d)).filter(Boolean).join(' · ');
+        return `<li><button type="button" class="pick-btn" data-pick="${escapeHtml(p.facilityId)}"><span class="pick-name">${escapeHtml(f.properties.name)}</span><span class="pick-reason">${escapeHtml(reasons)}</span></button></li>`;
       }).join('');
-      return `<div class="ai-summary"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>ReliefGrid AI summary</div>
-        <p>${escapeHtml(session.summary)}</p>${picks ? `<ul class="pick-list">${picks}</ul>` : ''}${session.caution ? `<p class="ai-caution">${escapeHtml(session.caution)}</p>` : ''}${foot}</div>`;
+      return `<div class="ai-summary"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Suggested first calls</div>
+        <p>${lead}</p>${picks ? `<ul class="pick-list">${picks}</ul>` : ''}${foot}</div>`;
     }
     case 'stale':
-      return `<div class="ai-summary is-stale"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Results changed</div><button type="button" class="btn btn-ghost btn-sm" id="ai-resummarize">Summarize these results</button></div>`;
+      return `<div class="ai-summary is-stale"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Results changed</div><button type="button" class="btn btn-ghost btn-sm" id="ai-resummarize">Suggest first calls again</button></div>`;
     case 'error':
-      return `<div class="ai-summary is-error"><span>${escapeHtml(session.summaryError || 'The summary isn’t available right now.')} The listings below are unaffected.</span> <button type="button" class="link-btn" id="ai-resummarize">Try again</button></div>`;
+      return `<div class="ai-summary is-error"><span>${escapeHtml(session.summaryError || 'Suggestions aren’t available right now.')} The listings below are unaffected.</span> <button type="button" class="link-btn" id="ai-resummarize">Try again</button></div>`;
     default:
       return '';
   }
@@ -262,7 +294,13 @@ function wireContext(box, results) {
     else if (r.startsWith('filter:')) updateSeekerQuery({ removeFilter: r.slice(7) });
     else if (r === 'travel') { session.needs.transportation = 'unspecified'; updateSeekerQuery({ travel: null }); }
     else if (r === 'location') updateSeekerQuery({ clearLocation: true });
-    else if (r === 'household') { session.hideHousehold = true; onResults(results, q); }
+    else if (r.startsWith('household:')) { session.hiddenHousehold.add(r.slice(10)); onResults(results, q); }
+  }));
+  box.querySelectorAll('[data-broaden]').forEach(b => b.addEventListener('click', () => {
+    const q = getSeekerQuery();
+    if (b.dataset.broaden === 'filters') q.quickFilters.forEach(f => updateSeekerQuery({ removeFilter: f }));
+    else if (b.dataset.broaden === 'location') updateSeekerQuery({ clearLocation: true });
+    else { window.__reliefgrid_navigate('seeker-home'); setTimeout(() => $('navigator-input')?.focus(), 60); }
   }));
   box.querySelector('#ai-add-need')?.addEventListener('change', (e) => {
     const v = e.target.value; if (!v) return;
@@ -276,7 +314,7 @@ function wireContext(box, results) {
   });
 }
 
-/* ── Explanation (optional second AI step, grounded in returned ids) ─── */
+/* ── Suggested first calls (optional second AI step: ids + verified codes) ── */
 async function requestExplanation() {
   if (!session) return;
   const q = getSeekerQuery();
@@ -288,19 +326,16 @@ async function requestExplanation() {
   rerender();
   try {
     const r = await aiRequest('explain', {
-      needs: {
-        categories: q.categories || [], urgency: mine.needs.urgency, transportation: mine.needs.transportation,
-        walkInsNeeded: !!mine.needs.walkInsNeeded, children: !!mine.needs.household?.children,
-      },
+      needs: { categories: q.categories || [], urgency: mine.needs.urgency, transportation: mine.needs.transportation, walkInsNeeded: !!mine.needs.walkInsNeeded },
       resources: results,
-      relaxedFilters: mine.relaxed,
-      locationLabel: q.userCoords ? q.locationLabel : null,
     });
     if (session !== mine) return;
-    mine.summary = String(r.summary || '');
-    mine.picks = Array.isArray(r.picks) ? r.picks : [];
-    mine.caution = r.caution || null;
-    mine.summaryState = mine.summary ? 'done' : 'error';
+    // Belt and braces: only ids ReliefGrid itself returned, only known reason codes.
+    const allowed = new Set(results.map(x => x.id));
+    mine.picks = (Array.isArray(r.picks) ? r.picks : [])
+      .filter(p => p && allowed.has(p.facilityId))
+      .map(p => ({ facilityId: p.facilityId, reasons: (Array.isArray(p.reasons) ? p.reasons : []).filter(c => REASON_TEXT[c]) }));
+    mine.summaryState = 'done';
   } catch (e) {
     if (session !== mine) return;
     mine.summaryState = 'error';
@@ -308,7 +343,7 @@ async function requestExplanation() {
   }
   rerender();
 }
-/** The top results exactly as ReliefGrid computed them (ids + display facts). */
+/** The top results exactly as ReliefGrid computed them (ids + facts it already displays). */
 function currentResultsSnapshot(q) {
   return (lastResults || []).slice(0, AI_CLIENT_CONFIG.limits.explainResources).map(({ f }) => {
     if (!f) return null;
@@ -317,7 +352,8 @@ function currentResultsSnapshot(q) {
     return {
       id: f.properties.facility_id,
       status: rec ? rec.status : 'unknown',
-      availability: rec ? availabilityHeadline(rec, f.properties.resource_group).slice(0, 120) : null,
+      openNow: rec ? rec.raw.open_now === true : false,
+      walkIns: rec ? rec.raw.walk_ins === true : false,
       distanceMiles: d != null ? Math.round(d * 10) / 10 : null,
     };
   }).filter(Boolean);

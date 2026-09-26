@@ -791,3 +791,8 @@ body.is-loading .landing-paths::after { content: none; }
   .ai-spark { forced-color-adjust: none; }
   .need-chip, .status-chip, .btn, .seeker-card { border: 1px solid CanvasText; }
 }
+
+/* ── Result card ↔ map marker selection ───────────────────────────── */
+.seeker-card.is-selected { border-color: var(--accent); background: var(--card-hover); box-shadow: 0 0 0 1px var(--accent-border), 0 0 22px rgba(92, 200, 255, 0.12); }
+.card-details-btn { margin-top: 10px; padding: 6px 0; min-height: 32px; background: none; border: none; color: var(--accent); font-size: var(--fs-sm); font-weight: 650; display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; }
+.card-details-btn:hover { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }

@@ -8,7 +8,10 @@
  * Environment variables (see .env.example — never commit real values):
  *   GEMINI_API_KEY            enables Gemini (Resource Navigator)
  *   OPENAI_API_KEY            enables OpenAI (Ask ReliefGrid analyst)
- *   GEMINI_MODEL              default gemini-2.5-flash
+ *   GEMINI_MODEL              default gemini-3.5-flash-lite (the ONLY place the
+ *                             default Gemini model is named)
+ *   GEMINI_THINKING_LEVEL     optional: minimal | low | medium | high. Unset =
+ *                             the model's own default (minimal on Flash-Lite)
  *   OPENAI_MODEL              default gpt-5-mini
  *   AI_ALLOW_FALLBACK         "true" → route to the other provider when the
  *                             primary is unavailable, for tasks marked
@@ -17,7 +20,7 @@
  *                             travel/area context on resource detail pages
  *   AI_ALLOWED_ORIGINS        comma-separated origins allowed to call the API
  *                             cross-origin (e.g. a GitHub Pages frontend)
- *   AI_RATE_LIMIT_PER_MIN     per-IP request budget (default 20)
+ *   AI_RATE_LIMIT_PER_MIN     per-IP request budget (default 40)
  * Values are read lazily so the local dev server can load .env first.
  * ==========================================================================*/
 const env = (k, d = '') => (process.env[k] ?? d).toString().trim();
@@ -28,8 +31,11 @@ export function aiConfig() {
     providers: {
       gemini: {
         apiKey: env('GEMINI_API_KEY'),
-        model: env('GEMINI_MODEL', 'gemini-2.5-flash'),
-        baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+        // Flash-Lite: Google's fastest, lowest-cost current Gemini model — the
+        // right fit for short structured-interpretation calls. (gemini-2.5-flash
+        // is deprecated with limited access.) Override with GEMINI_MODEL.
+        model: env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        thinkingLevel: env('GEMINI_THINKING_LEVEL') || null,
       },
       openai: {
         apiKey: env('OPENAI_API_KEY'),
@@ -53,7 +59,8 @@ export function aiConfig() {
     allowFallback: flag('AI_ALLOW_FALLBACK'),
     mapsGrounding: flag('GEMINI_MAPS_GROUNDING'),
     allowedOrigins: env('AI_ALLOWED_ORIGINS').split(',').map(s => s.trim()).filter(Boolean),
-    rateLimitPerMin: Number(env('AI_RATE_LIMIT_PER_MIN', '20')) || 20,
+    // Each Find Help search uses up to 2 requests; people at a demo often share one IP.
+    rateLimitPerMin: Number(env('AI_RATE_LIMIT_PER_MIN', '40')) || 40,
 
     limits: {
       interpretChars: 600,

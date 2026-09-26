@@ -193,14 +193,37 @@ function renderResults() {
   applyResultsMapFilter(results);
   resultsListeners.forEach(fn => { try { fn(results, getSeekerQuery()); } catch (e) { console.error(e); } });
 }
+// On the desktop results page a card click focuses its existing map marker
+// (details via the card's button); elsewhere — phones, Saved, similar
+// services — it opens the detail page as before.
+function cardSelectsMarker() {
+  return seekerPage === 'seeker-results' && !window.matchMedia('(max-width: 760px)').matches;
+}
+function activateCard(id) {
+  if (cardSelectsMarker()) selectResultCard(id, { fly: true });
+  else openSeekerDetail(id);
+}
+/** Highlight a result card, select its marker, and optionally fly to it. */
+function selectResultCard(id, { fly = false, scroll = false } = {}) {
+  document.querySelectorAll('#seeker-results-list .seeker-card').forEach(c => c.classList.toggle('is-selected', c.dataset.id === id));
+  const card = document.querySelector(`#seeker-results-list .seeker-card[data-id="${CSS.escape(id)}"]`);
+  if (scroll && card) card.scrollIntoView({ block: 'nearest', behavior: motion(1) ? 'smooth' : 'auto' });
+  if (fly) focusFacilityOnMap(id); else setSelectedFacility(id);
+}
+/** Marker clicks in Find Help: on the desktop results page select the matching
+ *  card; everywhere else open the detail page (the original behaviour). */
+export function onSeekerMarkerClick(id) {
+  if (cardSelectsMarker() && document.querySelector(`#seeker-results-list .seeker-card[data-id="${CSS.escape(id)}"]`)) selectResultCard(id, { scroll: true });
+  else openSeekerDetail(id);
+}
 function wireCardList(listEl, onSaveChange) {
   listEl.querySelectorAll('.seeker-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-save], [data-locate]')) return;
-      openSeekerDetail(card.dataset.id);
+      if (e.target.closest('[data-save], [data-locate], [data-details]')) return;
+      activateCard(card.dataset.id);
     });
     card.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && e.target === card) { e.preventDefault(); openSeekerDetail(card.dataset.id); }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === card) { e.preventDefault(); activateCard(card.dataset.id); }
     });
     card.addEventListener('mouseenter', () => setFacilityHover(card.dataset.id));
     card.addEventListener('mouseleave', () => setFacilityHover(null));
@@ -209,6 +232,7 @@ function wireCardList(listEl, onSaveChange) {
   });
   listEl.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleSaved(btn.dataset.save); onSaveChange && onSaveChange(); }));
   listEl.querySelectorAll('[data-locate]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); focusFacilityOnMap(btn.dataset.locate); }));
+  listEl.querySelectorAll('[data-details]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openSeekerDetail(btn.dataset.details); }));
 }
 /** Fly to a facility and mark it selected (used by cards and the AI summary). */
 export function focusFacilityOnMap(facilityId) {
@@ -277,6 +301,7 @@ function resourceCardHTML(feat, rec, distKm) {
       <span>${escapeHtml(p.address || 'Address not listed')}</span>
       <span>${rec ? `Updated ${escapeHtml(rec.relativeTime)} · demo` : ''}</span>
     </div>
+    <button type="button" class="card-details-btn" data-details="${id}">View details <span aria-hidden="true">→</span></button>
   </article>`;
 }
 
