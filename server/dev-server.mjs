@@ -30,6 +30,9 @@ const ROUTES = {
   '/api/ai/explain': 'api/ai/explain.js',
   '/api/ai/analyze': 'api/ai/analyze.js',
   '/api/ai/location-context': 'api/ai/location-context.js',
+  '/api/geo/geocode': 'api/geo/geocode.js',
+  '/api/geo/travel-times': 'api/geo/travel-times.js',
+  '/api/geo/route': 'api/geo/route.js',
 };
 const handlers = {};
 async function handlerFor(path) {

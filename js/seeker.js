@@ -3,8 +3,10 @@
  * ----------------------------------------------------------------------------
  * Built for someone who may be stressed, on a phone, and unfamiliar with the
  * service system: large targets, short plain-language copy, a list before a
- * map, and an honest degrade when we can't actually locate or route someone
- * (this prototype has no geocoder or turn-by-turn routing).
+ * map, and an honest degrade when location or travel times are unavailable.
+ * Location: bundled Census town/ZIP data, the Census address geocoder, or the
+ * browser (only on request). Travel times: openrouteservice via /api/geo, for
+ * a small prefiltered set of ReliefGrid candidates. See js/location.js.
  *
  * The AI Resource Navigator (js/ai/navigator.js) drives this shell through the
  * small public API at the bottom of the file (applySeekerPlan etc.). It never
@@ -13,13 +15,15 @@
  * ==========================================================================*/
 import {
   AppState, Availability, STATUS,
-  SEEKER_CATEGORIES, RESOURCE_LABELS, lookupTown,
+  SEEKER_CATEGORIES, RESOURCE_LABELS,
   findFacilityFeature, availabilityHeadline, openLabel, statusChipHTML, demoPillHTML,
   escapeHtml, cleanUrl, directionsUrl, haversineKm, kmToMiles, setUserLocationMarker,
   resourceLegendIcon, setFacilityHover, setSelectedFacility, fitPadding, motion,
   LONG_ISLAND_CENTER, LONG_ISLAND_ZOOM, setFacilitiesLayout, fitLongIsland, setUserLocationVisible, flyToPoint,
-  setTractHighlight, setSelectedTract,
+  setTractHighlight, setSelectedTract, setRouteLine,
 } from './shared.js';
+import { resolveLocationText, fetchTravelTimes, fetchRoute, formatDuration, metersToMiles, roundCoords } from './location.js';
+import { getAIStatus } from './ai/client.js';
 
 export const SEEKER_MAP_PAGES = new Set(['seeker-results']);
 export const SEEKER_CONTENT_PAGES = new Set(['seeker-home', 'seeker-detail', 'seeker-guided', 'seeker-saved', 'seeker-about']);
@@ -40,7 +44,16 @@ const state = {
   detailId: null,
   resultsHeading: 'Nearby resources',
   source: 'browse',      // 'browse' | 'guided' | 'ai' — how the current query was built
+  locationPrecision: null, // 'device' | 'zip' | 'place' | 'address'
+  // Real walk/drive travel times to ReliefGrid facilities (openrouteservice),
+  // held in memory for the current origin + mode only — never persisted.
+  travel: { mode: null, maxMinutes: null, maxMiles: null, times: new Map(), key: '', status: 'idle', error: null, relaxed: false, inflight: false },
 };
+// Travel-time pipeline limits: category filter → straight-line prefilter →
+// at most MAX_ROUTED candidates per request → ranking.
+const MAX_ROUTED = 25;
+const PREFILTER_KM = { walk: 8, drive: 60 };
+const MODE_WORD = { walk: 'walk', drive: 'drive' };
 const guided = { step: 0, need: null, tonight: null, walkins: null, travel: null };
 let savedIds = loadSaved();
 const resultsListeners = new Set();
@@ -119,34 +132,52 @@ function updateLocationUI() {
   setUserLocationMarker(state.userCoords);
   const badge = $('seeker-location-badge');
   if (badge) badge.textContent = state.userCoords ? `Using: ${state.locationLabel}` : '';
+  document.dispatchEvent(new CustomEvent('rg:location-changed', { detail: { label: state.userCoords ? state.locationLabel : null } }));
 }
-function useMyLocation() {
-  if (!('geolocation' in navigator)) { showLocationNote('Location access is not available in this browser. Type a town or ZIP instead — Call or Directions will still work from any result.'); return; }
-  showLocationNote('Requesting your location…');
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      state.userCoords = [pos.coords.longitude, pos.coords.latitude];
-      state.locationLabel = 'Your current location';
-      showLocationNote('Using your current location.');
-      updateLocationUI();
-    },
-    (err) => { showLocationNote(`We couldn't get your location (${err && err.message ? err.message : 'permission denied'}). Type a town or ZIP below, or keep browsing without one.`); },
-    { timeout: 8000 }
-  );
+/**
+ * Browser location — only ever called from an explicit user action ("Use my
+ * location"). The position is rounded to ~100 m, kept in memory only, and is
+ * never sent to the AI. Resolves to { ok, message }.
+ */
+export function useMyLocation() {
+  return new Promise((resolve) => {
+    if (!('geolocation' in navigator)) {
+      const message = 'Location access isn’t available in this browser. Type a town, ZIP code or address instead.';
+      showLocationNote(message); return resolve({ ok: false, message });
+    }
+    showLocationNote('Waiting for your browser’s permission… Your location is only used to sort nearby services on this page. It isn’t saved or shared with the AI.');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setSeekerLocation(roundCoords([pos.coords.longitude, pos.coords.latitude]), 'Your current location', 'device');
+        const message = 'Using your approximate current location.';
+        showLocationNote(message); rerenderIfResults(); resolve({ ok: true, message });
+      },
+      (err) => {
+        const message = err && err.code === 1
+          ? 'Location permission was declined — that’s fine. Type a town, ZIP code or address instead.'
+          : 'ReliefGrid couldn’t get your location. Type a town, ZIP code or address instead.';
+        showLocationNote(message); resolve({ ok: false, message });
+      },
+      { timeout: 10000, maximumAge: 300000, enableHighAccuracy: false },
+    );
+  });
 }
-function submitLocationText(text) {
+/** Typed location (town, ZIP, address or landmark). Resolves to { ok, message, label }. */
+export async function submitLocationText(text) {
   const t = (text || '').trim();
-  if (!t) { showLocationNote('Enter a Long Island town name, or use "Use My Location."'); return; }
-  const coords = lookupTown(t);
-  if (coords) {
-    state.userCoords = coords; state.locationLabel = t;
-    showLocationNote(`Showing results near ${t}. This prototype recognizes a set of Long Island towns rather than full street addresses — distances are straight-line estimates, not driving directions.`);
-  } else {
-    state.userCoords = null; state.locationLabel = t;
-    showLocationNote(`ReliefGrid's prototype doesn't recognize "${t}" yet. Showing all Long Island resources instead — try a nearby town name, or use "Use My Location."`);
+  if (!t) { const message = 'Enter a Long Island town, ZIP code or address — or use “Use my location.”'; showLocationNote(message); return { ok: false, message }; }
+  showLocationNote('Looking up that location…');
+  const r = await resolveLocationText(t);
+  if (r.ok) {
+    setSeekerLocation(r.coords, r.label, r.precision);
+    const message = `Searching near ${r.label}.`;
+    showLocationNote(message); rerenderIfResults();
+    return { ok: true, message, label: r.label };
   }
-  updateLocationUI();
+  showLocationNote(r.message);
+  return { ok: false, message: r.message };
 }
+function rerenderIfResults() { if (seekerPage === 'seeker-results') renderResults(); }
 
 /* ── Results (map page: list + map, mobile list/map toggle) ─────────────── */
 function activeGroups() {
@@ -155,20 +186,48 @@ function activeGroups() {
   state.categories.forEach(id => SEEKER_CATEGORIES.find(c => c.id === id)?.groups.forEach(g => groups.add(g)));
   return groups;
 }
-function computeResults() {
+/** ReliefGrid's own matching: category + availability quick filters (no distance). */
+function baseCandidates() {
   const groups = activeGroups();
   let list = (AppState.facilitiesData?.features || [])
     .filter(f => !groups || groups.has(f.properties.resource_group))
     .map(f => {
       const rec = Availability.get(f.properties.facility_id);
       const d = state.userCoords ? haversineKm(state.userCoords[0], state.userCoords[1], f.geometry.coordinates[0], f.geometry.coordinates[1]) : null;
-      return { f, rec, d };
+      return { f, rec, d, t: null };
     });
   if (state.quickFilters.has('open_now')) list = list.filter(x => x.rec && x.rec.raw.open_now !== false && x.rec.status !== 'closed');
   if (state.quickFilters.has('available_now')) list = list.filter(x => x.rec && x.rec.status === 'available');
   if (state.quickFilters.has('walk_ins')) list = list.filter(x => x.rec && x.rec.raw.walk_ins === true);
-  if (state.quickFilters.has('near_me') && state.userCoords) list = list.filter(x => x.d != null && x.d <= state.radiusKm);
+  return list;
+}
+const travelReady = () => !!(state.travel.mode && state.userCoords && state.travel.status === 'ready' && state.travel.times.size);
+function withinTravelLimits(t) {
+  if (state.travel.maxMinutes && !(t.durationSec <= state.travel.maxMinutes * 60)) return false;
+  if (state.travel.maxMiles && !(t.distanceM != null && metersToMiles(t.distanceM) <= state.travel.maxMiles)) return false;
+  return true;
+}
+function computeResults() {
+  let list = baseCandidates();
+  const travelOn = travelReady();
+  if (state.quickFilters.has('near_me') && state.userCoords && !travelOn) list = list.filter(x => x.d != null && x.d <= state.radiusKm);
+  state.travel.relaxed = false;
+  if (travelOn) {
+    list.forEach(x => { x.t = state.travel.times.get(x.f.properties.facility_id) || null; });
+    if (state.travel.maxMinutes || state.travel.maxMiles) {
+      const routed = list.filter(x => x.t && x.t.durationSec != null);
+      const within = routed.filter(x => withinTravelLimits(x.t));
+      // Never strand someone: if nothing is within the limit, keep every match —
+      // routed ones first by travel time, the rest by distance — and say so.
+      if (within.length) list = within; else state.travel.relaxed = true;
+    }
+  }
   list.sort((a, b) => {
+    if (travelOn) {
+      const ta = a.t?.durationSec, tb = b.t?.durationSec;
+      if (ta != null && tb != null && ta !== tb) return ta - tb;
+      if ((ta != null) !== (tb != null)) return ta != null ? -1 : 1;
+    }
     if (state.userCoords && a.d != null && b.d != null && Math.abs(a.d - b.d) > 0.05) return a.d - b.d;
     const ra = a.rec ? RANK[a.rec.status] : 2, rb = b.rec ? RANK[b.rec.status] : 2;
     if (ra !== rb) return ra - rb;
@@ -176,22 +235,96 @@ function computeResults() {
   });
   return list;
 }
+
+/* ── Travel times (only on explicit need: a location + a chosen travel mode) ── */
+function travelKey() { return state.travel.mode && state.userCoords ? `${state.travel.mode}|${roundCoords(state.userCoords).join(',')}` : ''; }
+function resetTravelTimes() { Object.assign(state.travel, { times: new Map(), key: '', status: 'idle', error: null }); setRouteLine(null); }
+/** Fetch travel times for the nearest matching candidates not yet routed. At most
+ *  one request per origin + mode + candidate set; map moves never trigger it. */
+async function ensureTravelTimes() {
+  const t = state.travel;
+  if (!t.mode || !state.userCoords || !getAIStatus().location?.travelTimes || t.inflight) return;
+  const key = travelKey();
+  if (t.key !== key) { t.times = new Map(); t.key = key; t.status = 'idle'; t.error = null; }
+  if (t.status === 'error') return; // no automatic retry loop; the user can retry
+  const candidates = baseCandidates().filter(x => x.d != null && x.d <= PREFILTER_KM[t.mode]).sort((a, b) => a.d - b.d).slice(0, MAX_ROUTED);
+  const missing = candidates.map(x => x.f.properties.facility_id).filter(id => !t.times.has(id));
+  if (!missing.length) {
+    const next = candidates.length ? 'ready' : 'none';
+    if (t.status !== next) { t.status = next; renderResults(); } // re-render only on a real change
+    return;
+  }
+  t.inflight = true; t.status = 'loading'; renderTravelBar();
+  try {
+    const times = await fetchTravelTimes(state.userCoords, t.mode, missing);
+    if (travelKey() !== key) return;
+    missing.forEach(id => t.times.set(id, times.get(id) || { facilityId: id, durationSec: null, distanceM: null }));
+    t.status = 'ready';
+  } catch (e) {
+    if (travelKey() !== key) return;
+    t.status = 'error';
+    t.error = e?.code === 'rate_limited' ? 'Travel times are busy right now.' : 'Travel times are unavailable right now.';
+  } finally { t.inflight = false; }
+  if (seekerPage === 'seeker-results') renderResults();
+}
+function renderTravelBar() {
+  const el = $('seeker-travel-bar'); if (!el) return;
+  const loc = getAIStatus().location || {};
+  if (!state.userCoords) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  const t = state.travel;
+  const btn = (mode, label) => `<button type="button" data-travel-mode="${mode}" aria-pressed="${t.mode === mode || (!t.mode && mode === 'none')}" class="${t.mode === mode || (!t.mode && mode === 'none') ? 'active' : ''}">${label}</button>`;
+  const limit = t.maxMinutes ? `within ${t.maxMinutes} min` : t.maxMiles ? `within ${t.maxMiles} mi` : '';
+  let statusLine = '';
+  if (!loc.travelTimes) statusLine = 'Distances are straight-line estimates (travel times aren’t set up on this deployment).';
+  else if (!t.mode) statusLine = 'Straight-line distances. Choose Walk or Drive for real travel times.';
+  else if (t.status === 'loading') statusLine = `Calculating ${t.mode === 'walk' ? 'walking' : 'driving'} times…`;
+  else if (t.status === 'error') statusLine = `${t.error} Showing straight-line distances. <button type="button" class="link-btn" data-travel-retry>Try again</button>`;
+  else if (t.status === 'none') statusLine = `No matching listings are within ${PREFILTER_KM[t.mode]} km straight-line to calculate ${t.mode === 'walk' ? 'walking' : 'driving'} times.`;
+  else if (t.status === 'ready') statusLine = `${t.mode === 'walk' ? 'Walking' : 'Driving'} times to the nearest ${Math.min(MAX_ROUTED, t.times.size)} matches${limit && !t.relaxed ? ` · showing ${limit}` : ''}${t.relaxed ? ` — none are ${limit}, so all matches are shown, nearest first` : ''}. Estimates without live traffic; transit isn’t included.`;
+  el.innerHTML = `<div class="travel-row"><span class="travel-label">Travel</span><div class="mode-switch" role="group" aria-label="Travel mode">${btn('none', 'Distance')}${loc.travelTimes ? btn('walk', 'Walk') + btn('drive', 'Drive') : ''}</div>
+      ${limit && t.mode ? `<span class="need-chip need-chip-filter">${escapeHtml(limit)}<button type="button" class="chip-x" data-travel-clear-limit aria-label="Remove travel limit">×</button></span>` : ''}</div>
+    <div class="travel-status muted small" aria-live="polite">${statusLine}</div>
+    ${t.mode && loc.travelTimes ? '<div class="travel-attrib">Travel times &amp; routes: openrouteservice · © OpenStreetMap contributors</div>' : ''}`;
+  el.querySelectorAll('[data-travel-mode]').forEach(b => b.addEventListener('click', () => updateSeekerQuery({ travelMode: b.dataset.travelMode === 'none' ? null : b.dataset.travelMode })));
+  el.querySelector('[data-travel-clear-limit]')?.addEventListener('click', () => updateSeekerQuery({ clearTravelLimit: true }));
+  el.querySelector('[data-travel-retry]')?.addEventListener('click', () => { state.travel.status = 'idle'; ensureTravelTimes(); });
+}
+async function showRoute(facilityId) {
+  const t = state.travel; const feat = findFacilityFeature(facilityId);
+  if (!t.mode || !state.userCoords || !feat) return;
+  const note = $('seeker-travel-bar')?.querySelector('.travel-status');
+  if (note) note.textContent = 'Loading route…';
+  try {
+    const r = await fetchRoute(state.userCoords, t.mode, facilityId);
+    setRouteLine(r.geometry, t.mode);
+    setSelectedFacility(facilityId);
+    if (window.matchMedia('(max-width: 760px)').matches) setResultsMobileView('map');
+    const xs = r.geometry.coordinates.map(c => c[0]), ys = r.geometry.coordinates.map(c => c[1]);
+    try { AppState.map.fitBounds([[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)]], { padding: fitPadding(), maxZoom: 15, duration: motion(600) }); } catch (_) {}
+    if (note) note.textContent = `Route shown: ${formatDuration(r.durationSec) || ''} ${MODE_WORD[t.mode]} · ${r.distanceM != null ? `${metersToMiles(r.distanceM).toFixed(1)} mi` : ''} (openrouteservice · © OpenStreetMap contributors)`;
+  } catch (_) {
+    if (note) note.textContent = 'The route couldn’t be loaded right now. Use “Get Directions” on the listing instead.';
+  }
+}
 function renderResults() {
   const results = computeResults();
   const heading = $('seeker-results-heading');
   if (heading) heading.textContent = `${results.length} ${results.length === 1 ? 'result' : 'results'} · ${state.resultsHeading}`;
   const sub = $('seeker-results-sub');
-  if (sub) sub.textContent = state.userCoords ? `Near ${state.locationLabel} · straight-line distances` : 'Add your location to sort by distance';
+  if (sub) sub.textContent = state.userCoords ? `Searching near ${state.locationLabel}` : 'Add your location to sort by distance';
+  renderTravelBar();
   const listEl = $('seeker-results-list');
   if (listEl) {
     listEl.innerHTML = results.length
-      ? results.map(r => resourceCardHTML(r.f, r.rec, r.d)).join('')
+      ? results.map(r => resourceCardHTML(r.f, r.rec, r.d, r.t)).join('')
       : `<div class="seeker-empty"><strong>No listings match all of these filters right now.</strong><span>Try removing a filter — or call the provider directly, availability changes often.</span><button type="button" class="btn btn-ghost btn-sm" id="seeker-clear-filters">Clear filters</button></div>`;
     wireCardList(listEl, () => renderResults());
     $('seeker-clear-filters')?.addEventListener('click', () => { state.quickFilters.clear(); syncQuickFilterButtons(); renderResults(); });
   }
   applyResultsMapFilter(results);
   resultsListeners.forEach(fn => { try { fn(results, getSeekerQuery()); } catch (e) { console.error(e); } });
+  ensureTravelTimes();
 }
 // On the desktop results page a card click focuses its existing map marker
 // (details via the card's button); elsewhere — phones, Saved, similar
@@ -219,7 +352,7 @@ export function onSeekerMarkerClick(id) {
 function wireCardList(listEl, onSaveChange) {
   listEl.querySelectorAll('.seeker-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-save], [data-locate], [data-details]')) return;
+      if (e.target.closest('[data-save], [data-locate], [data-details], [data-route]')) return;
       activateCard(card.dataset.id);
     });
     card.addEventListener('keydown', (e) => {
@@ -232,6 +365,7 @@ function wireCardList(listEl, onSaveChange) {
   });
   listEl.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleSaved(btn.dataset.save); onSaveChange && onSaveChange(); }));
   listEl.querySelectorAll('[data-locate]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); focusFacilityOnMap(btn.dataset.locate); }));
+  listEl.querySelectorAll('[data-route]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); showRoute(btn.dataset.route); }));
   listEl.querySelectorAll('[data-details]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openSeekerDetail(btn.dataset.details); }));
 }
 /** Fly to a facility and mark it selected (used by cards and the AI summary). */
@@ -280,22 +414,31 @@ function setResultsMobileView(view) {
   // Wait for the sheet's height transition so the padding reflects its final size.
   if (view === 'map') setTimeout(() => { AppState.map?.resize(); frameResults(0); }, motion(340));
 }
-function resourceCardHTML(feat, rec, distKm) {
+function resourceCardHTML(feat, rec, distKm, travel = null) {
   const p = feat.properties;
   const status = rec ? rec.status : 'unknown';
   const isSaved = savedIds.has(p.facility_id);
-  const distHTML = distKm != null ? `<span class="seeker-dist" title="Straight-line distance">${kmToMiles(distKm).toFixed(1)} mi</span>` : '';
+  // Route travel time (openrouteservice) and straight-line distance are always labelled separately.
+  const tMode = state.travel.mode;
+  const travelHTML = travel && travel.durationSec != null
+    ? `<span class="seeker-travel" title="Estimated ${tMode === 'walk' ? 'walking' : 'driving'} time by route (openrouteservice)">${formatDuration(travel.durationSec)} ${MODE_WORD[tMode]}${travel.distanceM != null ? ` · ${metersToMiles(travel.distanceM).toFixed(1)} mi route` : ''}</span>`
+    : travel && travel.durationSec == null ? `<span class="seeker-travel is-none">No ${tMode === 'walk' ? 'walking' : 'driving'} route found</span>` : '';
+  const distHTML = distKm != null ? `<span class="seeker-dist" title="Straight-line distance, not a route">${kmToMiles(distKm).toFixed(1)} mi <small>straight-line</small></span>` : '';
+  const routeBtn = tMode && state.userCoords && getAIStatus().location?.routeLines && travel?.durationSec != null
+    ? `<button type="button" class="icon-btn" data-route="${escapeHtml(p.facility_id)}" aria-label="Show ${tMode === 'walk' ? 'walking' : 'driving'} route on the map" title="Show route on the map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 15.18V7c0-2.21-1.79-4-4-4s-4 1.79-4 4v10c0 1.1-.9 2-2 2s-2-.9-2-2V8.82C8.16 8.4 9 7.3 9 6c0-1.66-1.34-3-3-3S3 4.34 3 6c0 1.3.84 2.4 2 2.82V17c0 2.21 1.79 4 4 4s4-1.79 4-4V7c0-1.1.9-2 2-2s2 .9 2 2v8.18A2.996 2.996 0 0 0 18 21c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82z"/></svg></button>` : '';
   const id = escapeHtml(p.facility_id);
   return `<article class="seeker-card" data-id="${id}" tabindex="0" aria-label="${escapeHtml(p.name || 'Unnamed resource')}">
     <div class="seeker-card-top">
       ${resourceLegendIcon(p.resource_group, null, 30)}
       <div class="seeker-card-title"><h3>${escapeHtml(p.name || 'Unnamed resource')}</h3><div class="seeker-card-type">${escapeHtml(RESOURCE_LABELS[p.resource_group] || '')}</div></div>
       <div class="seeker-card-tools">
+        ${routeBtn}
         <button type="button" class="icon-btn" data-locate="${id}" aria-label="Show on map" title="Show on map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.99 8.99 0 0 0 13 3.06V1h-2v2.06A8.99 8.99 0 0 0 3.06 11H1v2h2.06A8.99 8.99 0 0 0 11 20.94V23h2v-2.06A8.99 8.99 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg></button>
         <button type="button" class="icon-btn seeker-save-btn ${isSaved ? 'saved' : ''}" data-save="${id}" aria-pressed="${isSaved}" aria-label="${isSaved ? 'Remove from saved' : 'Save this resource'}">${isSaved ? '★' : '☆'}</button>
       </div>
     </div>
     <div class="seeker-card-status">${statusChipHTML(status)}<span class="open-label">${escapeHtml(openLabel(rec))}</span>${distHTML}</div>
+    ${travelHTML ? `<div class="seeker-card-travel">${travelHTML}</div>` : ''}
     ${rec ? `<div class="seeker-card-info">${escapeHtml(availabilityHeadline(rec, p.resource_group))}</div>` : `<div class="seeker-card-info muted">Availability not shared yet</div>`}
     <div class="seeker-card-meta">
       <span>${escapeHtml(p.address || 'Address not listed')}</span>
@@ -500,24 +643,29 @@ export function getSavedCount() { return savedIds.size; }
 
 /** Read-only snapshot of the current query. */
 export function getSeekerQuery() {
+  const t = state.travel;
   return {
     categories: state.categories ? [...state.categories] : null,
     quickFilters: [...state.quickFilters],
     radiusKm: state.radiusKm,
     userCoords: state.userCoords ? [...state.userCoords] : null,
     locationLabel: state.locationLabel,
+    locationPrecision: state.locationPrecision,
     source: state.source,
     heading: state.resultsHeading,
+    travel: { mode: t.mode, maxMinutes: t.maxMinutes, maxMiles: t.maxMiles, status: t.status, relaxed: t.relaxed },
   };
 }
 /** Subscribe to every results render: fn(results, query). */
 export function onSeekerResultsRendered(fn) { resultsListeners.add(fn); return () => resultsListeners.delete(fn); }
 
-/** Set / clear the searcher's location (coords from the prototype town lookup or geolocation). */
-export function setSeekerLocation(coords, label) {
+/** Set / clear the search origin. Coordinates are kept in memory only. */
+export function setSeekerLocation(coords, label, precision = null) {
   state.userCoords = coords || null;
   state.locationLabel = coords ? (label || '') : '';
+  state.locationPrecision = coords ? precision : null;
   if (!coords) state.quickFilters.delete('near_me');
+  resetTravelTimes();
   updateLocationUI();
 }
 
@@ -526,7 +674,10 @@ export function setSeekerLocation(coords, label) {
  * translation rules as the guided flow, then show results. Returns the list
  * of filters that had to be relaxed to avoid a zero-result dead end.
  *   plan = { categories: string[], openNow: bool, walkIns: bool,
- *            travel: 'walking'|'driving'|'unsure'|null, heading: string }
+ *            travel: 'walking'|'driving'|'unsure'|null, heading: string,
+ *            travelMode: 'walk'|'drive'|null, maxMinutes: number|null, maxMiles: number|null }
+ * When real travel times are available, travelMode/maxMinutes replace the
+ * straight-line "near me" radius; otherwise the original radius rule applies.
  */
 export function applySeekerPlan(plan) {
   const valid = new Set(SEEKER_CATEGORIES.map(c => c.id));
@@ -538,14 +689,17 @@ export function applySeekerPlan(plan) {
   if (plan.openNow) filters.add('open_now');
   if (plan.walkIns && cats.some(c => WALKIN_RELEVANT_CATEGORIES.has(c))) filters.add('walk_ins');
   state.radiusKm = plan.travel ? (TRAVEL_RADIUS_KM[plan.travel] ?? DEFAULT_RADIUS_KM) : DEFAULT_RADIUS_KM;
-  if (state.userCoords && plan.travel) filters.add('near_me');
+  const routing = !!(getAIStatus().location?.travelTimes && plan.travelMode);
+  Object.assign(state.travel, { mode: plan.travelMode || null, maxMinutes: plan.maxMinutes || null, maxMiles: plan.maxMiles || null });
+  resetTravelTimes();
+  if (state.userCoords && plan.travel && !routing) filters.add('near_me');
   state.quickFilters = filters;
   const relaxed = relaxUntilResults();
   window.__reliefgrid_navigate('seeker-results');
   return relaxed;
 }
 
-/** Incremental edits from the "Needs identified" chips; re-renders results. */
+/** Incremental edits from the "Needs identified" chips / travel bar; re-renders results. */
 export function updateSeekerQuery(patch) {
   if ('categories' in patch) {
     const valid = new Set(SEEKER_CATEGORIES.map(c => c.id));
@@ -559,6 +713,13 @@ export function updateSeekerQuery(patch) {
     state.radiusKm = patch.travel ? (TRAVEL_RADIUS_KM[patch.travel] ?? DEFAULT_RADIUS_KM) : DEFAULT_RADIUS_KM;
     if (!patch.travel) state.quickFilters.delete('near_me');
   }
+  if ('travelMode' in patch) {
+    state.travel.mode = patch.travelMode === 'walk' || patch.travelMode === 'drive' ? patch.travelMode : null;
+    if (!state.travel.mode) { state.travel.maxMinutes = null; state.travel.maxMiles = null; }
+    resetTravelTimes();
+    if (state.travel.mode) state.quickFilters.delete('near_me'); // real travel times replace the straight-line radius
+  }
+  if (patch.clearTravelLimit) { state.travel.maxMinutes = null; state.travel.maxMiles = null; }
   if (patch.clearLocation) setSeekerLocation(null);
   syncQuickFilterButtons();
   if (seekerPage === 'seeker-results') renderResults();

@@ -60,6 +60,7 @@
             <button type="button" data-view="map" id="seeker-results-view-map" aria-pressed="false">Map</button>
           </div>
         </div>
+        <div id="seeker-travel-bar" class="travel-bar" hidden></div>
         <div id="seeker-ai-context" class="ai-context" hidden></div>
         <div id="seeker-results-list" class="seeker-results-list"></div>
       </aside>
@@ -232,6 +233,7 @@
                 <button type="submit" class="btn btn-ai" id="navigator-submit"><span class="btn-label">Find help</span></button>
               </div>
             </form>
+            <div id="navigator-location" class="navigator-location" aria-live="polite"></div>
             <div id="navigator-setup"></div>
             <div id="navigator-status" class="ai-status" role="status" aria-live="polite" hidden></div>
             <div id="navigator-examples" class="ai-suggestions" aria-label="Example requests"></div>
@@ -246,11 +248,12 @@
           <div class="seeker-location-block">
             <div class="section-label">Your location</div>
             <form id="seeker-location-form" class="seeker-location-form">
-              <label for="seeker-location-input" class="sr-only">Long Island town</label>
-              <input type="text" id="seeker-location-input" placeholder="Enter a Long Island town (e.g. Hempstead)" autocomplete="off" />
+              <label for="seeker-location-input" class="sr-only">Town, ZIP code or address</label>
+              <input type="text" id="seeker-location-input" placeholder="Town, ZIP code or address (e.g. Manhasset or 11030)" autocomplete="off" />
               <button type="submit" class="btn btn-secondary">Go</button>
             </form>
-            <button type="button" class="btn btn-ghost seeker-use-location-btn" id="seeker-use-location">Use My Location</button>
+            <button type="button" class="btn btn-ghost seeker-use-location-btn" id="seeker-use-location">Use my location</button>
+            <p class="location-privacy muted small">Your location is only used to sort nearby services on this page. It isn’t saved or sent to the AI. Towns and ZIP codes are looked up on your device.</p>
             <div id="seeker-location-note" class="seeker-location-note hidden" role="status"></div>
             <div id="seeker-location-badge" class="muted small"></div>
           </div>

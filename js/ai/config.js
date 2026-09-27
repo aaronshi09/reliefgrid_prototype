@@ -34,9 +34,13 @@ export const AI_CLIENT_CONFIG = {
     explain: '/api/ai/explain',
     analyze: '/api/ai/analyze',
     locationContext: '/api/ai/location-context',
+    // Location services (no AI involved): address lookup, travel times, route lines.
+    geocode: '/api/geo/geocode',
+    travelTimes: '/api/geo/travel-times',
+    route: '/api/geo/route',
   },
   // Every AI request has a hard client-side timeout: no infinite spinners.
   // The status check is retried once (serverless cold starts can be slow).
-  timeoutsMs: { status: 10000, interpret: 30000, explain: 30000, analyze: 75000, locationContext: 35000 },
+  timeoutsMs: { status: 10000, interpret: 30000, explain: 30000, analyze: 75000, locationContext: 35000, geocode: 15000, travelTimes: 20000, route: 20000 },
   limits: { requestChars: 600, questionChars: 500, explainResources: 6, historyTurns: 3 },
 };

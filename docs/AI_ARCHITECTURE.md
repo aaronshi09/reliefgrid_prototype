@@ -44,6 +44,8 @@ One provider serves each request, and requests are never sent to both. The UI do
 | Navigator UI | `js/ai/navigator.js` (drives `js/seeker.js` via its public API) |
 | Analyst UI + map sync | `js/ai/analyst.js` (uses `js/gov.js` renderers and layers) |
 | Shared taxonomy / interpretation code (browser and server) | `js/core/taxonomy.js`, `js/core/analysis.js` |
+| Location services (no AI): config, address geocoding, travel times, route lines | `server/geo/config.js`, `server/geo/services.js`, `api/geo/{geocode,travel-times,route}.js` |
+| Browser location resolution (bundled Census towns/ZIPs first) | `js/location.js`, `data/li_places.json` (built by `scripts/build-li-places.mjs`) |
 
 ## Resource Navigator (Gemini)
 
@@ -71,6 +73,7 @@ One provider serves each request, and requests are never sent to both. The UI do
 3. **Suggest first calls** (`POST /api/ai/explain`, optional). The browser sends only the top result **ids**, plus the availability status, open-now, walk-ins and distance it already displays. The server looks up all other facts. Gemini returns only `{ facilityId, reasons[] }`, where reasons come from a fixed list (`matches_need`, `closest`, `listed_available`, `listed_open`, `walk_ins`, `mentions_families`). The server drops ids ReliefGrid didn't return and reason codes the data doesn't support, and the browser re-checks the ids. **Gemini writes no text about resources:** every displayed word comes from ReliefGrid templates and data.
 4. **Location context** (`POST /api/ai/location-context`, off by default). This uses Gemini's Google Maps grounding for one listing, based on the listing's coordinates, never the user's. It is rendered as *External · Google Maps*, separate from ReliefGrid's listing, with its sources.
 
+**Location-aware matching.** Gemini's interpretation also reports *intent*: `nearMe`, stated `maxMiles` / `maxMinutes` limits and `distancePreference`, plus the town or ZIP in `locationText`. Values are clamped and validated; Gemini never produces a distance or travel time. ReliefGrid resolves the location (bundled Census data, then the Census Geocoder), filters its own listings, prefilters by straight-line distance, and requests openrouteservice walk/drive times for at most 25 candidates. It then ranks by those times. The suggestion step's `closest` reason is verified against routed minutes when present. See the README section *Location-aware Find Help*.
 ## Ask ReliefGrid (OpenAI)
 
 **Model:** `gpt-6-luna` with `reasoning.effort: "low"`, set in one place (`server/ai/config.js`; override with `OPENAI_MODEL` / `OPENAI_REASONING_EFFORT`). ReliefGrid retrieves the data deterministically, so the model's job is only to interpret the supplied values. OpenAI's efficient tier supports that with Structured Outputs at a fraction of the cost and latency of `gpt-6-sol` or `gpt-6-astra`.

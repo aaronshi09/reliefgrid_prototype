@@ -245,6 +245,15 @@ export async function initMapLayers() {
   });
   map.addLayer({ id: 'districts-stroke', type: 'line', source: 'districts', layout: { visibility: 'none' }, paint: { 'line-color': '#4a5f82', 'line-width': 0.6, 'line-opacity': 0.7 } });
 
+  // Optional route line to one selected resource (openrouteservice / OSM data,
+  // which may be displayed on any map). Drawn beneath the resource markers.
+  map.addSource('route', { type: 'geojson', data: EMPTY_FC });
+  map.addLayer({ id: 'route-casing', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#04101c', 'line-width': 7, 'line-opacity': 0.8 } });
+  map.addLayer({ id: 'route-line', type: 'line', source: 'route', filter: ['!=', ['get', 'mode'], 'walk'], layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': ACCENT, 'line-width': 3.5 } });
+  map.addLayer({ id: 'route-line-walk', type: 'line', source: 'route', filter: ['==', ['get', 'mode'], 'walk'], layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': ACCENT, 'line-width': 3.5, 'line-dasharray': [1, 1.6] } });
+
   // Halo beneath markers: hover / AI-match / selected, driven by feature-state
   // so it animates smoothly without touching the data.
   const hs = (k) => ['boolean', ['feature-state', k], false];
@@ -440,6 +449,11 @@ export function setAvailabilityLayerVisibility(on) {
 export function setMapLayer(key) {
   const map = AppState.map; if (!map) return;
   map.setPaintProperty('tract-fill', 'fill-color', key === 'lisa' ? lisaColorExpr() : continuousExpr(key));
+}
+/** Show (or clear, with null) a route LineString on the MapLibre map. */
+export function setRouteLine(geometry, mode = 'walk') {
+  const map = AppState.map; if (!map || !map.getSource('route')) return;
+  map.getSource('route').setData(geometry ? { type: 'FeatureCollection', features: [{ type: 'Feature', geometry, properties: { mode } }] } : EMPTY_FC);
 }
 export function setUserLocationMarker(coords) {
   const map = AppState.map; if (!map || !map.getSource('user-location')) return;

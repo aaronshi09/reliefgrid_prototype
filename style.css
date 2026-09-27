@@ -801,3 +801,25 @@ body.is-loading .landing-paths::after { content: none; }
 .based-on { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
 .based-on-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-right: 3px; }
 .based-on-chip { font-size: 11.5px; padding: 2px 8px; border-radius: var(--r-pill); background: rgba(148, 178, 226, 0.07); border: 1px solid var(--border); color: var(--text-2); }
+
+/* ── Location-aware finding: search origin, travel bar, travel info ───── */
+.navigator-location { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: var(--fs-sm); color: var(--text-2); }
+.navigator-location:empty { display: none; }
+.navigator-location strong { color: var(--text); }
+.nav-loc-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-right: 2px; }
+.location-privacy { margin: 8px 0 0; line-height: 1.5; }
+.travel-bar { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.travel-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.travel-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); }
+.travel-bar .mode-switch button { min-height: 34px; }
+.travel-status { line-height: 1.5; }
+.travel-attrib { font-size: 11px; color: var(--text-3); }
+.seeker-card-travel { margin-top: 6px; }
+.seeker-travel { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-sm); font-weight: 650; color: var(--accent-ink); background: var(--accent-soft); border: 1px solid rgba(92, 200, 255, 0.25); border-radius: var(--r-pill); padding: 2px 10px; }
+.seeker-travel.is-none { color: var(--text-3); background: rgba(148, 178, 226, 0.06); border-color: var(--border); font-weight: 600; }
+.seeker-dist small { font-weight: 500; color: var(--text-3); font-size: 11px; }
+.ai-note-location .loc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.loc-form { display: flex; gap: 6px; flex: 1; min-width: 200px; }
+.loc-form input { flex: 1; min-width: 0; height: 36px; padding: 0 10px; border-radius: var(--r-sm); background: var(--field); border: 1px solid var(--border-2); color: var(--text); font-size: 16px; }
+.loc-form input:focus { outline: none; border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(92, 200, 255, 0.12); }
+.loc-msg:not(:empty) { margin-top: 6px; color: var(--warn-ink); }

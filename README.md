@@ -102,6 +102,7 @@ In the browser: **Analyze Service Gaps → Ask ReliefGrid**, try the suggested q
 | `GEMINI_MAPS_GROUNDING` | — | `true` enables optional Google Maps travel/area context on resource detail pages. Default off. |
 | `AI_ALLOWED_ORIGINS` | split hosting | Comma-separated origins allowed to call the API cross-origin. |
 | `AI_RATE_LIMIT_PER_MIN` | — | Per-IP budget (default 40; best-effort, per instance). |
+| `OPENROUTESERVICE_API_KEY` | walk/drive travel times, route lines, landmark search | Free key at openrouteservice.org; server-side only. Towns, ZIPs and addresses work without it. |
 
 **Setting keys locally:** put them in `.env` (git-ignored). **In production:** set them as environment variables / secrets in your host's dashboard. Never put keys in `index.html`, `js/`, or any committed file. The browser never receives a key; `/api/ai/status` reports only which features are enabled.
 
@@ -127,6 +128,58 @@ The GitHub Pages copy at `aaronshi09.github.io/reliefgrid_prototype` is already 
 
 Other Node hosts work too: each `api/ai/*.js` file exports a standard `(req, res)` handler, and `server/dev-server.mjs` can run as a plain Node server behind HTTPS.
 
+## Location-aware Find Help
+
+People can ask "I need food near me", "somewhere to stay — I don't have a car", "legal help near 11550" or "healthcare within walking distance". The roles stay separate:
+
+| Layer | Responsibility |
+| --- | --- |
+| Gemini | Understands the request, including location intent ("near me", a named town/ZIP) and transport intent (no car, walking, can drive, stated limits like "within 5 miles"). It never computes distances or travel times. |
+| ReliefGrid | The only source of resources: category and availability filters over `longisland_facilities.geojson`, then ranking. |
+| Location services | Resolve the search origin and compute walk/drive times **to ReliefGrid facilities only** (see below). |
+| MapLibre | Displays everything: results, the search origin, and an optional route line. |
+
+**Why not Google Maps Platform?** Google's terms prohibit using Geocoding and Routes content "with or near a non-Google map" (Terms of Service §3.2.3(e); Service Specific Terms, Geocoding §6.2, Routes §19.2), and ReliefGrid's map is MapLibre. The feature therefore uses providers whose data may be shown on any map. The existing "Get Directions" buttons still open Google Maps through plain links, which need no API key.
+
+**How a location is resolved**
+1. **ZIP code or Long Island town/village/hamlet:** looked up in the browser from `data/li_places.json`, built by `scripts/build-li-places.mjs` from public-domain U.S. Census 2025 Gazetteer files and filtered to ReliefGrid's own Nassau/Suffolk tracts. Nothing is sent anywhere.
+2. **Street address:** `POST /api/geo/geocode` → U.S. Census Geocoder (public, no key). The result must fall inside a Nassau/Suffolk tract.
+3. **Landmark:** falls back to openrouteservice search (OpenStreetMap), if configured.
+4. **"Use my location":** the browser's own geolocation, requested **only** when that button is pressed, rounded to about 100 m and kept in memory.
+
+**Travel times** (`POST /api/geo/travel-times`, openrouteservice Matrix): these run only once a location and a travel mode are set.
+- The mode comes from what the person said (no car / walking → walk; can drive → drive), or from the Distance / Walk / Drive switch in the results panel.
+- The pipeline is: ReliefGrid category filter → straight-line prefilter (within 8 km for walking, 60 km for driving) → the **25 nearest** candidates → **one** Matrix request → rank by travel time, then apply any stated or default limit (30-minute walk; 15-minute drive for "not too far").
+- If nothing is within the limit, every match is still shown, routed ones first, and the panel says so.
+- Cards show route time ("12 min walk · 0.8 mi route") separately from straight-line distance ("0.6 mi straight-line").
+- Transit isn't calculated and is never implied; no-car requests use walking times with a note.
+- **Route line** (`POST /api/geo/route`): drawn on MapLibre only when the person presses a card's route button.
+
+**Calls per search**
+- Plain "I need food": no location calls at all.
+- Town or ZIP: 0 location calls.
+- Address: 1 Census call (free).
+- With a travel mode: 1 Matrix call (≤ 25 destinations).
+- Each "show route" press: 1 Directions call.
+
+Map panning or zooming never triggers requests, repeats are de-duplicated for 10 minutes in server memory, and the per-IP rate limit applies.
+
+**Setup (manual):**
+1. Create a free openrouteservice account and API key at https://openrouteservice.org/dev/#/signup.
+2. Add it to Vercel as `OPENROUTESERVICE_API_KEY` (Production), then redeploy.
+3. Keep this key server-side only; it's never sent to the browser.
+4. Review openrouteservice's current terms and plan limits when you sign up; their pages render in the browser, so I couldn't quote them here.
+5. Show attribution. ReliefGrid already displays "openrouteservice · © OpenStreetMap contributors" wherever travel times or routes appear.
+
+Without the key, towns, ZIPs, addresses, "Use my location" and straight-line ranking all still work; the Walk/Drive options are simply hidden.
+
+**Test locally:** add the key to `.env`, run `npm run dev`, open Find Resources, and try "I need food near Manhasset", "I can drive and need legal help near Brentwood" or "I need somewhere to stay and I don't have a car". Then press a card's route button.
+
+**Test production:**
+1. `GET /api/ai/status` → `"location":{"travelTimes":true,…}`.
+2. `POST /api/geo/travel-times` with `{"origin":[-73.69,40.79],"mode":"walk","facilityIds":["<an id from the dataset>"]}` → `durationSec` values.
+3. Try the searches above on the live site.
+
 ## 5. What works without AI
 
 Everything except the two AI surfaces:
@@ -139,7 +192,7 @@ With no keys (or no backend), the AI inputs are disabled and a short setup notic
 ## 6. Limitations and unfinished work
 
 - **Availability is simulated demo data** (see [AVAILABILITY.md](AVAILABILITY.md)); both AI features label it as such.
-- **Location is a prototype town lookup**, not a geocoder. Distances are straight-line estimates.
+- **Location:** towns and ZIPs come from bundled Census data (area centres, not addresses), and addresses from the Census Geocoder. Travel times are openrouteservice estimates without live traffic; transit isn't calculated.
 - **Service Access is one combined score per tract.** For category questions ("where is food least accessible?") the analyst uses straight-line distance to the nearest listing and says so.
 - Tracts have no neighbourhood names in the data, so answers refer to GEOIDs and counties.
 - **Numeric grounding is a heuristic.** Every figure in an Ask ReliefGrid brief is compared with the numbers ReliefGrid supplied for that request, and anything unmatched is flagged to the user. It cannot prove every sentence is correct, so the evidence table is always rendered from ReliefGrid's own data rather than from the model's text.

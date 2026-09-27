@@ -14,15 +14,16 @@
  * The language model never produces a resource or any resource text.
  * ==========================================================================*/
 import {
-  Availability, SEEKER_CATEGORIES, lookupTown, findFacilityFeature, escapeHtml, kmToMiles, haversineKm,
+  Availability, SEEKER_CATEGORIES, findFacilityFeature, escapeHtml, kmToMiles, haversineKm,
   setFacilityEmphasis,
 } from '../shared.js';
 import {
   applySeekerPlan, updateSeekerQuery, onSeekerResultsRendered, setSeekerLocation, getSeekerQuery,
-  focusFacilityOnMap, openSeekerDetail, WALKIN_RELEVANT_CATEGORIES,
+  focusFacilityOnMap, openSeekerDetail, WALKIN_RELEVANT_CATEGORIES, useMyLocation, submitLocationText,
 } from '../seeker.js';
 import { aiRequest, getAIStatus, loadAIStatus, redactSensitive, setupNoticeHTML, AIClientError } from './client.js';
 import { AI_CLIENT_CONFIG } from './config.js';
+import { resolveLocationText, formatDuration } from '../location.js';
 
 const $ = (id) => document.getElementById(id);
 const CAT_LABEL = Object.fromEntries(SEEKER_CATEGORIES.map(c => [c.id, c.label]));
@@ -50,8 +51,25 @@ export function initNavigator() {
   document.addEventListener('rg:ai-status', renderAvailability);
   document.addEventListener('rg:seeker-detail-rendered', (e) => renderLocationContextEntry(e.detail?.facilityId));
   onSeekerResultsRendered(onResults);
+  document.addEventListener('rg:location-changed', renderNavigatorLocation);
+  renderNavigatorLocation();
   loadAIStatus().then(renderAvailability);
   updateCounter();
+}
+
+/* ── Home: optional search location (never requested automatically) ──── */
+function renderNavigatorLocation() {
+  const el = $('navigator-location'); if (!el) return;
+  const q = getSeekerQuery();
+  el.innerHTML = q.userCoords
+    ? `<span class="nav-loc-label">Searching near</span><strong>${escapeHtml(q.locationLabel)}</strong><button type="button" class="link-btn" data-nav-loc="change">Change</button><button type="button" class="link-btn" data-nav-loc="clear">Clear</button>`
+    : `<span class="nav-loc-label">Location (optional)</span><button type="button" class="chip-btn" data-nav-loc="use">Use my location</button><button type="button" class="chip-btn" data-nav-loc="change">Type a town or ZIP</button>`;
+  el.querySelectorAll('[data-nav-loc]').forEach(btn => btn.addEventListener('click', async () => {
+    const k = btn.dataset.navLoc;
+    if (k === 'use') await useMyLocation();
+    else if (k === 'clear') updateSeekerQuery({ clearLocation: true });
+    else { const input = $('seeker-location-input'); input?.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => input?.focus(), 250); }
+  }));
 }
 
 /* ── Home: availability / setup state ─────────────────────────────────── */
@@ -122,25 +140,42 @@ async function submit(raw) {
 
   setStatus(progressHTML(1));
   await nextFrame(); // let the "searching" stage paint before the (synchronous) search runs
-  // Location: only the prototype town lookup — no geocoding service is used.
+  // Location: a named town / ZIP from the request is resolved by ReliefGrid
+  // (bundled Census data, else the address geocoder). "Near me" never triggers
+  // a permission prompt by itself — the results panel offers the choice.
   let locationNote = null;
   if (needs.locationText) {
-    const coords = lookupTown(needs.locationText);
-    if (coords) setSeekerLocation(coords, titleCase(needs.locationText));
-    else locationNote = `ReliefGrid’s prototype doesn’t recognize “${needs.locationText}” as a Long Island town yet, so results aren’t sorted by distance. You can set a town below.`;
+    const r = await resolveLocationText(needs.locationText);
+    if (r.ok) setSeekerLocation(r.coords, r.label, r.precision);
+    else locationNote = `${r.message} You can set a location on the results page.`;
   }
+  const needsLocation = !!(needs.nearMe && !needs.locationText && !getSeekerQuery().userCoords);
 
-  const travel = travelFor(needs.transportation);
+  // Transportation intent → travel mode for real travel times (walk / drive only;
+  // bus and train times aren't available, so no-car requests use walking times).
+  const travelMode = travelModeFor(needs.transportation);
+  const maxMinutes = needs.maxMinutes || (travelMode === 'walk' ? 30 : travelMode === 'drive' && needs.distancePreference === 'close' ? 15 : null);
   const plan = {
     categories: needs.categories,
     openNow: needs.urgency === 'immediate',
     walkIns: !!needs.walkInsNeeded,
-    travel,
+    travel: travelFor(needs.transportation),
+    travelMode, maxMinutes, maxMiles: needs.maxMiles || null,
   };
-  session = { needs, plan, locationNote, relaxed: [], picks: [], summaryState: 'idle', resultKey: '', hiddenHousehold: new Set() };
+  session = { needs, plan, locationNote, needsLocation, relaxed: [], picks: [], summaryState: 'idle', resultKey: '', hiddenHousehold: new Set() };
   session.relaxed = applySeekerPlan(plan);   // → navigates to results → onResults()
   busy = false; setBusyUI(false);
   setStatus('');
+  session.explainPending = true;
+  maybeExplain(getSeekerQuery());
+}
+/** Suggestions wait until travel times (if any are coming) have settled, so the
+ *  ranking they describe is the one the person sees. */
+function maybeExplain(q) {
+  if (!session?.explainPending) return;
+  const routing = !!(q.travel?.mode && q.userCoords && getAIStatus().location?.travelTimes);
+  if (routing && !['ready', 'error', 'none'].includes(q.travel.status)) return;
+  session.explainPending = false;
   requestExplanation();
 }
 function setBusyUI(on) {
@@ -155,7 +190,11 @@ function travelFor(t) {
   if (t === 'no_car' || t === 'public_transit') return 'unsure';
   return null;
 }
-function titleCase(s) { return String(s).replace(/\b\w/g, c => c.toUpperCase()); }
+function travelModeFor(t) {
+  if (t === 'driving') return 'drive';
+  if (t === 'walking' || t === 'no_car' || t === 'public_transit') return 'walk';
+  return null; // unspecified → straight-line; the user can pick Walk / Drive
+}
 function nextFrame() { return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); }
 function errorHTML(e) {
   const msg = e instanceof AIClientError ? e.userMessage : 'Something went wrong with AI assistance. Please try again.';
@@ -184,7 +223,8 @@ const CAT_BY_GROUP = Object.fromEntries(SEEKER_CATEGORIES.flatMap(c => c.groups.
 // the AI only picks which listing ids and which verified reason codes apply.
 const REASON_TEXT = {
   matches_need: (f) => `Matches: ${CAT_BY_GROUP[f.properties.resource_group] || 'your needs'}`,
-  closest: (f, d) => (d != null ? `Closest match · ${d.toFixed(1)} mi straight-line` : 'Closest match'),
+  // Travel times come from ReliefGrid's routing service (openrouteservice), never from the AI.
+  closest: (f, d, t) => (t?.durationSec != null ? `Shortest ${t.mode === 'drive' ? 'drive' : 'walk'} from your location · ${formatDuration(t.durationSec)}` : d != null ? `Closest match · ${d.toFixed(1)} mi straight-line` : 'Closest match'),
   listed_available: () => 'Listed as available (demo data)',
   listed_open: () => 'Listed as open now (demo data)',
   walk_ins: () => 'Listing shows walk-ins accepted (demo data)',
@@ -208,6 +248,7 @@ function onResults(results, query) {
   const picks = session.summaryState === 'done' ? session.picks.map(p => p.facilityId).filter(id => visible.has(id)) : [];
   setFacilityEmphasis(picks);
   document.querySelectorAll('#seeker-results-list .seeker-card').forEach(c => c.classList.toggle('is-ai-pick', picks.includes(c.dataset.id)));
+  maybeExplain(query);
 }
 
 function needsHTML(q) {
@@ -219,7 +260,12 @@ function needsHTML(q) {
       ? chip('Needed now · open now', { remove: 'filter:open_now', kind: 'filter', title: 'Showing listings reporting open now (demo availability data)' })
       : chip('Needed now', { kind: 'info', title: 'No listing could be confirmed open now, so all matching listings are shown' }));
   } else if (URGENCY_LABEL[n.urgency]) chips.push(chip(URGENCY_LABEL[n.urgency], { kind: 'info' }));
-  if (TRAVEL_LABEL[n.transportation]) {
+  if (q.travel?.mode) {
+    // Real travel times (walk / drive) are in use — the travel bar shows the details.
+    const limit = q.travel.maxMinutes ? ` · within ${q.travel.maxMinutes} min` : q.travel.maxMiles ? ` · within ${q.travel.maxMiles} mi` : '';
+    chips.push(chip(`${TRAVEL_LABEL[n.transportation] || (q.travel.mode === 'walk' ? 'Walking' : 'Driving')}${q.userCoords ? limit : ''}`, { remove: 'travelmode', kind: q.userCoords ? 'filter' : 'info',
+      title: q.userCoords ? `Ranked by ${q.travel.mode === 'walk' ? 'walking' : 'driving'} time from your location` : 'Add a location to rank by travel time' }));
+  } else if (TRAVEL_LABEL[n.transportation]) {
     const radius = q.radiusKm; const within = q.quickFilters.includes('near_me') ? ` · within ~${kmToMiles(radius).toFixed(radius < 5 ? 1 : 0)} mi` : '';
     chips.push(chip(`${TRAVEL_LABEL[n.transportation]}${within}`, { remove: q.quickFilters.includes('near_me') ? 'travel' : null, kind: within ? 'filter' : 'info',
       title: within ? 'Straight-line distance from your town — not travel time' : 'Add a location to limit results by distance' }));
@@ -248,6 +294,16 @@ function notesHTML(q, results) {
   const relaxedNames = { open_now: '“open now”', near_me: 'distance', walk_ins: '“walk-ins”' };
   if (session.relaxed.length) notes.push(`<div class="ai-note">No listings matched every detail, so ReliefGrid loosened ${session.relaxed.map(r => relaxedNames[r] || r).join(' and ')} to show the closest matches.</div>`);
   if (session.locationNote) notes.push(`<div class="ai-note">${escapeHtml(session.locationNote)}</div>`);
+  // "Near me" / travel intent without a location: offer the choice — never auto-request it.
+  if (!q.userCoords && (session.needsLocation || q.travel?.mode)) {
+    notes.push(`<div class="ai-note ai-note-location"><strong>Want results sorted by what’s closest to you?</strong> Share your location or type a town, ZIP code or address. It’s only used on this page and isn’t saved or sent to the AI.
+      <div class="loc-actions"><button type="button" class="chip-btn" data-loc-use>Use my location</button>
+      <form class="loc-form" data-loc-form><label class="sr-only" for="ai-loc-input">Town, ZIP code or address</label><input id="ai-loc-input" type="text" autocomplete="off" placeholder="Town, ZIP or address"><button type="submit" class="chip-btn">Set</button></form></div>
+      <div class="loc-msg small" aria-live="polite">${escapeHtml(session.locMsg || '')}</div></div>`);
+  }
+  if (['no_car', 'public_transit'].includes(session.needs.transportation) && q.travel?.mode === 'walk' && q.userCoords) {
+    notes.push('<div class="ai-note">ReliefGrid can’t calculate bus or train times yet, so walking times are shown. Transit may reach more places — check with the provider or 511NY.</div>');
+  }
   const unmatched = session.needs.unmatchedNeeds || [];
   if (unmatched.length) notes.push(`<div class="ai-note">ReliefGrid’s listings don’t have a category for ${unmatched.map(u => `“${escapeHtml(u)}”`).join(', ')}. The listings below cover the needs it could match.</div>`);
   if (session.plan.walkIns && !(q.categories || []).some(c => WALKIN_RELEVANT_CATEGORIES.has(c))) notes.push(`<div class="ai-note">Walk-in information is only tracked for healthcare, mental-health and legal listings.</div>`);
@@ -273,7 +329,8 @@ function summaryHTML(results, q) {
       const picks = session.picks.map(p => {
         const f = findFacilityFeature(p.facilityId); if (!f) return '';
         const d = q.userCoords ? kmToMiles(haversineKm(q.userCoords[0], q.userCoords[1], f.geometry.coordinates[0], f.geometry.coordinates[1])) : null;
-        const reasons = p.reasons.map(code => REASON_TEXT[code]?.(f, d)).filter(Boolean).join(' · ');
+        const tr = lastResults?.find(x => x.f.properties.facility_id === p.facilityId)?.t;
+        const reasons = p.reasons.map(code => REASON_TEXT[code]?.(f, d, tr ? { ...tr, mode: q.travel?.mode } : null)).filter(Boolean).join(' · ');
         return `<li><button type="button" class="pick-btn" data-pick="${escapeHtml(p.facilityId)}"><span class="pick-name">${escapeHtml(f.properties.name)}</span><span class="pick-reason">${escapeHtml(reasons)}</span></button></li>`;
       }).join('');
       return `<div class="ai-summary"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Suggested first calls</div>
@@ -295,7 +352,16 @@ function wireContext(box, results) {
     else if (r === 'travel') { session.needs.transportation = 'unspecified'; updateSeekerQuery({ travel: null }); }
     else if (r === 'location') updateSeekerQuery({ clearLocation: true });
     else if (r.startsWith('household:')) { session.hiddenHousehold.add(r.slice(10)); onResults(results, q); }
+    else if (r === 'travelmode') updateSeekerQuery({ travelMode: null });
   }));
+  box.querySelector('[data-loc-use]')?.addEventListener('click', async () => {
+    const r = await useMyLocation(); session.locMsg = r.ok ? '' : r.message; if (!r.ok) rerender();
+  });
+  box.querySelector('[data-loc-form]')?.addEventListener('submit', async (e) => {
+    e.preventDefault(); const v = e.currentTarget.querySelector('input').value;
+    session.locMsg = 'Looking up that location…'; box.querySelector('.loc-msg').textContent = session.locMsg;
+    const r = await submitLocationText(v); session.locMsg = r.ok ? '' : r.message; if (!r.ok) rerender();
+  });
   box.querySelectorAll('[data-broaden]').forEach(b => b.addEventListener('click', () => {
     const q = getSeekerQuery();
     if (b.dataset.broaden === 'filters') q.quickFilters.forEach(f => updateSeekerQuery({ removeFilter: f }));
@@ -345,7 +411,7 @@ async function requestExplanation() {
 }
 /** The top results exactly as ReliefGrid computed them (ids + facts it already displays). */
 function currentResultsSnapshot(q) {
-  return (lastResults || []).slice(0, AI_CLIENT_CONFIG.limits.explainResources).map(({ f }) => {
+  return (lastResults || []).slice(0, AI_CLIENT_CONFIG.limits.explainResources).map(({ f, t }) => {
     if (!f) return null;
     const rec = Availability.get(f.properties.facility_id);
     const d = q.userCoords ? kmToMiles(haversineKm(q.userCoords[0], q.userCoords[1], f.geometry.coordinates[0], f.geometry.coordinates[1])) : null;
@@ -355,6 +421,9 @@ function currentResultsSnapshot(q) {
       openNow: rec ? rec.raw.open_now === true : false,
       walkIns: rec ? rec.raw.walk_ins === true : false,
       distanceMiles: d != null ? Math.round(d * 10) / 10 : null,
+      // Route travel time from ReliefGrid's routing service (the AI only compares it).
+      travelMinutes: t?.durationSec != null ? Math.round(t.durationSec / 60) : null,
+      travelMode: t?.durationSec != null ? q.travel?.mode || null : null,
     };
   }).filter(Boolean);
 }

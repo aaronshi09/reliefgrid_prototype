@@ -18,7 +18,7 @@
  * ==========================================================================*/
 const root = new URL('../', import.meta.url);
 process.env.GEMINI_API_KEY = 'check-key-DO-NOT-LEAK'; process.env.OPENAI_API_KEY = 'check';
-delete process.env.AI_ALLOW_FALLBACK; delete process.env.GEMINI_MAPS_GROUNDING; delete process.env.GEMINI_MODEL; delete process.env.GEMINI_THINKING_LEVEL;
+delete process.env.AI_ALLOW_FALLBACK; delete process.env.GEMINI_MAPS_GROUNDING; delete process.env.GEMINI_MODEL; delete process.env.GEMINI_THINKING_LEVEL; delete process.env.OPENROUTESERVICE_API_KEY;
 
 const sent = []; let queue = [];
 globalThis.fetch = async (input, init = {}) => {
@@ -35,12 +35,13 @@ globalThis.fetch = async (input, init = {}) => {
 };
 // Interactions API (structured output) and generateContent (tool loop) response shapes.
 const interaction = (o) => ({ json: { id: 'int_test', status: 'completed', steps: [{ type: 'user_input', content: [{ type: 'text', text: '…' }] }, { type: 'model_output', content: [{ type: 'text', text: typeof o === 'string' ? o : JSON.stringify(o) }] }] } });
-const needs = (o) => interaction({ requestType: 'service_request', categories: [], urgency: 'unspecified', transportation: 'unspecified', walkInsNeeded: false, householdContext: [], locationText: '', unmatchedNeeds: [], clarifyingQuestion: '', safetyConcern: false, ...o });
+const needs = (o) => interaction({ requestType: 'service_request', categories: [], urgency: 'unspecified', transportation: 'unspecified', walkInsNeeded: false, householdContext: [], locationText: '', unmatchedNeeds: [], clarifyingQuestion: '', safetyConcern: false, nearMe: false, maxMiles: 0, maxMinutes: 0, distancePreference: 'any', ...o });
 
 const nav = await import(new URL('server/ai/workflows/navigator.js', root));
 const ana = await import(new URL('server/ai/workflows/analyst.js', root));
 const { aiConfig } = await import(new URL('server/ai/config.js', root));
 const { executeTool, ANALYST_TOOLS } = await import(new URL('server/data/analyst-tools.js', root));
+const INTERPRET_SCHEMA_REQ = ['nearMe', 'maxMiles', 'maxMinutes', 'distancePreference'];
 const facilities = JSON.parse(await (await import('node:fs/promises')).readFile(new URL('longisland_facilities.geojson', root), 'utf8'));
 const realIds = new Set(facilities.features.map(f => f.properties.facility_id));
 
@@ -220,6 +221,56 @@ queue = [{ status: 503, json: {} }, interaction({ status: 'answered', answer: 'S
 r = await ana.analyze({ question: 'Where are the strongest spatial clusters?' });
 check(r.meta.fallbackUsed && r.meta.provider === 'gemini', 'opt-in fallback sends the same retrieved context to Gemini');
 delete process.env.AI_ALLOW_FALLBACK;
+
+// ── Location services (openrouteservice / Census mocked; no key, no network).
+const geo = await import(new URL('server/geo/services.js', root));
+const facs = facilities.features;
+const foodNearHempstead = facs.filter(f => f.properties.resource_group === 'food').slice(0, 3).map(f => f.properties.facility_id);
+await rejects(geo.travelTimes({ origin: [-73.62, 40.70], mode: 'walk', facilityIds: foodNearHempstead }), 'not_configured', 'travel times need OPENROUTESERVICE_API_KEY');
+process.env.OPENROUTESERVICE_API_KEY = 'ors-check-key';
+let orsBody = null;
+queue = [(body) => { orsBody = body; return { json: { durations: [[600, 1200, null]], distances: [[800, 1600, null]] } }; }];
+r = await geo.travelTimes({ origin: [-73.6243219, 40.7001234], mode: 'walk', facilityIds: [...foodNearHempstead, 'invented:999'] });
+const oreqGeo = sent.at(-1);
+check(oreqGeo.url.endsWith('/v2/matrix/foot-walking') && oreqGeo.headers.authorization === 'ors-check-key' && !oreqGeo.raw.includes('ors-check-key'), 'Matrix request: walking profile, key only in the Authorization header');
+check(JSON.stringify(orsBody.locations[0]) === '[-73.624,40.7]', 'origin rounded to ~100 m before leaving the server');
+check(orsBody.locations.length === 4 && JSON.stringify(orsBody.sources) === '[0]' && JSON.stringify(orsBody.destinations) === '[1,2,3]', 'destinations are only known ReliefGrid facilities (invented id dropped)');
+check(JSON.stringify(orsBody.locations[1]) === JSON.stringify(facs.find(f => f.properties.facility_id === foodNearHempstead[0]).geometry.coordinates), 'destination coordinates come from the ReliefGrid dataset');
+check(r.times[0].durationSec === 600 && r.times[2].durationSec === null, 'durations returned as-is; unroutable → null');
+const callsNow = sent.length;
+r = await geo.travelTimes({ origin: [-73.6243219, 40.7001234], mode: 'walk', facilityIds: foodNearHempstead });
+check(sent.length === callsNow && r.cached === true, 'identical repeat request is served from the short in-memory cache (no new API call)');
+await rejects(geo.travelTimes({ origin: [-118.24, 34.05], mode: 'walk', facilityIds: foodNearHempstead }), 'invalid_request', 'origins outside the service area are rejected');
+await rejects(geo.travelTimes({ origin: [-73.62, 40.70], mode: 'transit', facilityIds: foodNearHempstead }), 'invalid_request', 'unsupported travel modes (e.g. transit) are rejected, not faked');
+const many = facs.slice(0, 60).map(f => f.properties.facility_id);
+queue = [(body) => { orsBody = body; return { json: { durations: [Array(25).fill(60)], distances: [Array(25).fill(100)] } }; }];
+await geo.travelTimes({ origin: [-73.5, 40.75], mode: 'drive', facilityIds: many });
+check(orsBody.destinations.length === 25 && sent.at(-1).url.endsWith('/driving-car'), 'at most 25 destinations per request; driving profile');
+queue = [{ status: 429, json: { error: 'quota' } }];
+await rejects(geo.travelTimes({ origin: [-73.4, 40.8], mode: 'walk', facilityIds: foodNearHempstead }), 'rate_limited', 'routing quota exceeded → rate_limited');
+// Geocoding: Census address match, then landmark fallback, then not found.
+queue = [{ json: { result: { addressMatches: [{ coordinates: { x: -73.6257164, y: 40.7176187 }, matchedAddress: '1 WASHINGTON CT, HEMPSTEAD, NY, 11550' }] } } }];
+r = await geo.geocode('1 Washington St, Hempstead');
+check(r.precision === 'address' && JSON.stringify(r.coords) === '[-73.626,40.718]' && sent.at(-1).url.includes('geocoding.geo.census.gov'), 'street address → U.S. Census Geocoder, coordinates rounded');
+queue = [{ json: { result: { addressMatches: [] } } }, { json: { features: [{ geometry: { coordinates: [-73.6, 40.715] }, properties: { label: 'Hofstra University, Hempstead, NY', layer: 'venue' } }] } }];
+r = await geo.geocode('Hofstra University');
+check(r?.precision === 'place' && /openrouteservice/.test(r.source), 'landmark → openrouteservice search when Census has no match');
+queue = [{ json: { result: { addressMatches: [{ coordinates: { x: -118.24, y: 34.05 }, matchedAddress: 'LOS ANGELES' }] } } }, { json: { features: [] } }];
+check(await geo.geocode('123 Main St Los Angeles') === null, 'locations outside Long Island are not accepted');
+delete process.env.OPENROUTESERVICE_API_KEY;
+
+// Gemini location / transport intent (intent only — never computed distances).
+queue = [needs({ categories: ['food'], transportation: 'walking', nearMe: true, maxMiles: 2, maxMinutes: 900, distancePreference: 'close', locationText: '11030' })];
+r = await nav.interpret('I need food near me within 2 miles, somewhere I can walk to');
+check(r.needs.nearMe === true && r.needs.maxMiles === 2 && r.needs.maxMinutes === null && r.needs.distancePreference === 'close', 'location intent fields sanitised (out-of-range limits dropped)');
+check(r.needs.locationText === '11030', 'a ZIP code is accepted as a location; street addresses still are not');
+check(INTERPRET_SCHEMA_REQ.every(k => sent.at(-1).body.response_format.schema.required.includes(k)), 'schema requires the new intent fields');
+queue = [interaction({ picks: [{ facilityId: foodNearHempstead[1], reasons: ['closest'] }, { facilityId: foodNearHempstead[0], reasons: ['closest'] }] })];
+r = await nav.explain({ needs: { categories: ['food'] }, resources: [
+  { id: foodNearHempstead[0], status: 'unknown', distanceMiles: 0.5, travelMinutes: 20, travelMode: 'walk' },
+  { id: foodNearHempstead[1], status: 'unknown', distanceMiles: 0.9, travelMinutes: 12, travelMode: 'walk' },
+] });
+check(r.picks[0].reasons.includes('closest') && !r.picks[1].reasons.includes('closest'), '"closest" is verified against routed travel minutes, not straight-line distance');
 
 console.log(failures ? `\n${failures} check(s) failed` : '\nAll checks passed');
 process.exit(failures ? 1 : 0);

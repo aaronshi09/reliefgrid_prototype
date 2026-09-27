@@ -25,7 +25,7 @@ export class AIClientError extends Error {
 }
 
 /* ── Status (is the backend reachable / which features are configured) ── */
-let status = { checked: false, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [], reason: null };
+let status = { checked: false, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [], location: { addressLookup: false, travelTimes: false, routeLines: false }, reason: null };
 let statusPromise = null;
 
 export function getAIStatus() { return status; }
@@ -48,8 +48,9 @@ export function loadAIStatus() {
       navigator: !!j?.features?.navigator, analyst: !!j?.features?.analyst,
       locationContext: !!j?.features?.locationContext,
       missing: Array.isArray(j?.setup?.missing) ? j.setup.missing.filter(s => /^[A-Z_]+$/.test(s)) : [],
+      location: { addressLookup: !!j?.location?.addressLookup, travelTimes: !!j?.location?.travelTimes, routeLines: !!j?.location?.routeLines },
       reason: null,
-    } : { checked: true, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [], reason: res.reason };
+    } : { checked: true, reachable: false, navigator: false, analyst: false, locationContext: false, missing: [], location: { addressLookup: false, travelTimes: false, routeLines: false }, reason: res.reason };
     document.dispatchEvent(new CustomEvent('rg:ai-status', { detail: status }));
     return status;
   })();
