@@ -598,6 +598,7 @@ body.is-loading .landing-paths::after { content: none; }
 .sd-section a { word-break: break-all; }
 .sd-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 .sd-actions .btn { flex: 1; min-width: 120px; }
+.sd-actions .btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
 .sd-save-btn { flex: 0 0 auto !important; min-width: 110px; }
 #sd-similar .seeker-card { margin-top: 10px; }
 .ext-context { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
