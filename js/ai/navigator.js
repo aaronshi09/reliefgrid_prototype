@@ -28,8 +28,8 @@ import { resolveLocationText, formatDuration } from '../location.js';
 const $ = (id) => document.getElementById(id);
 const CAT_LABEL = Object.fromEntries(SEEKER_CATEGORIES.map(c => [c.id, c.label]));
 const EXAMPLES = [
-  'I need somewhere safe to sleep tonight and I don’t have a car',
-  'I’m a mother with two kids. We need food and a safe place to stay',
+  'I need food and don’t have a car',
+  'I need somewhere safe to sleep tonight',
   'I’m being evicted and need legal help',
   'I need to see a doctor but I don’t have insurance',
 ];
@@ -61,15 +61,11 @@ export function initNavigator() {
 function renderNavigatorLocation() {
   const el = $('navigator-location'); if (!el) return;
   const q = getSeekerQuery();
+  // The town / ZIP / address field sits right below; this only confirms what's in use.
   el.innerHTML = q.userCoords
-    ? `<span class="nav-loc-label">Searching near</span><strong>${escapeHtml(q.locationLabel)}</strong><button type="button" class="link-btn" data-nav-loc="change">Change</button><button type="button" class="link-btn" data-nav-loc="clear">Clear</button>`
-    : `<span class="nav-loc-label">Location (optional)</span><button type="button" class="chip-btn" data-nav-loc="use">Use my location</button><button type="button" class="chip-btn" data-nav-loc="change">Type a town or ZIP</button>`;
-  el.querySelectorAll('[data-nav-loc]').forEach(btn => btn.addEventListener('click', async () => {
-    const k = btn.dataset.navLoc;
-    if (k === 'use') await useMyLocation();
-    else if (k === 'clear') updateSeekerQuery({ clearLocation: true });
-    else { const input = $('seeker-location-input'); input?.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => input?.focus(), 250); }
-  }));
+    ? `<span class="nav-loc-current"><span aria-hidden="true">✓</span> Using <strong>${escapeHtml(q.locationLabel)}</strong></span><button type="button" class="link-btn" data-nav-loc="clear">Clear</button>`
+    : '';
+  el.querySelector('[data-nav-loc="clear"]')?.addEventListener('click', () => { updateSeekerQuery({ clearLocation: true }); $('seeker-location-note')?.classList.add('hidden'); });
 }
 
 /* ── Home: availability / setup state ─────────────────────────────────── */
@@ -85,8 +81,8 @@ function renderAvailability() {
   if (!s.checked) { setup.innerHTML = ''; return; }
   setup.innerHTML = on ? '' : setupNoticeHTML('navigator');
   $('navigator-input').placeholder = on
-    ? 'e.g. I need somewhere safe to sleep tonight and I don’t have a car'
-    : 'AI search is not available on this deployment';
+    ? 'e.g. I need food and don’t have a car'
+    : 'Typed search isn’t available right now — pick a category below';
 }
 function renderExamples() {
   const el = $('navigator-examples'); if (!el) return;
@@ -105,7 +101,7 @@ function setStatus(html, kind = 'info') {
   el.hidden = !html;
 }
 function progressHTML(step) {
-  const steps = ['Understanding your needs…', 'Searching verified ReliefGrid resources…'];
+  const steps = ['Understanding what you need…', 'Finding places that can help…'];
   return `<div class="ai-progress">${steps.map((s, i) => `<div class="ai-step ${i < step ? 'done' : i === step ? 'active' : ''}"><span class="ai-step-dot" aria-hidden="true"></span>${escapeHtml(s)}</div>`).join('')}</div>`;
 }
 
@@ -279,10 +275,9 @@ function needsHTML(q) {
   const addable = SEEKER_CATEGORIES.filter(c => !used.has(c.id));
   const addSelect = addable.length ? `<label class="add-need"><span class="sr-only">Add a need</span><select id="ai-add-need"><option value="">+ Add a need</option>${addable.map(c => `<option value="${c.id}">${escapeHtml(c.label)}</option>`).join('')}</select></label>` : '';
 
-  return `<div class="ai-needs" aria-label="Needs identified">
-    <div class="ai-needs-head"><span class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Needs identified</span><button type="button" class="link-btn" id="ai-edit-request">Edit request</button></div>
+  return `<div class="ai-needs" aria-label="What we understood">
+    <div class="ai-needs-head"><span class="ai-label">What we understood</span><button type="button" class="link-btn" id="ai-edit-request">Edit</button></div>
     <div class="chip-row">${chips.join('')}${addSelect}</div>
-    <div class="ai-foot">AI helps interpret your request. Resource information comes from ReliefGrid data.</div>
   </div>`;
 }
 function chip(label, { remove = null, kind = 'need', title = '' } = {}) {
@@ -296,9 +291,9 @@ function notesHTML(q, results) {
   if (session.locationNote) notes.push(`<div class="ai-note">${escapeHtml(session.locationNote)}</div>`);
   // "Near me" / travel intent without a location: offer the choice — never auto-request it.
   if (!q.userCoords && (session.needsLocation || q.travel?.mode)) {
-    notes.push(`<div class="ai-note ai-note-location"><strong>Want results sorted by what’s closest to you?</strong> Share your location or type a town, ZIP code or address. It’s only used on this page and isn’t saved or sent to the AI.
+    notes.push(`<div class="ai-note ai-note-location"><strong>See what’s closest to you?</strong> Share your location or enter a town, ZIP code, or address. Used only on this page; not saved.
       <div class="loc-actions"><button type="button" class="chip-btn" data-loc-use>Use my location</button>
-      <form class="loc-form" data-loc-form><label class="sr-only" for="ai-loc-input">Town, ZIP code or address</label><input id="ai-loc-input" type="text" autocomplete="off" placeholder="Town, ZIP or address"><button type="submit" class="chip-btn">Set</button></form></div>
+      <form class="loc-form" data-loc-form><label class="sr-only" for="ai-loc-input">Town, ZIP code, or address</label><input id="ai-loc-input" type="text" autocomplete="off" placeholder="Enter town, ZIP code, or address"><button type="submit" class="chip-btn">Set</button></form></div>
       <div class="loc-msg small" aria-live="polite">${escapeHtml(session.locMsg || '')}</div></div>`);
   }
   if (['no_car', 'public_transit'].includes(session.needs.transportation) && q.travel?.mode === 'walk' && q.userCoords) {
@@ -313,18 +308,18 @@ function notesHTML(q, results) {
       q.userCoords ? '<button type="button" class="chip-btn" data-broaden="location">Search all of Long Island</button>' : '',
       '<button type="button" class="chip-btn" data-broaden="all">Start a new search</button>',
     ].join('');
-    notes.push(`<div class="ai-note ai-note-warn"><strong>No verified ReliefGrid listings match these needs right now.</strong> ReliefGrid only shows listings it actually has. Try broadening your search:<div class="clarify-cats">${opts}</div></div>`);
+    notes.push(`<div class="ai-note ai-note-warn"><strong>No ReliefGrid listings match all of these needs.</strong> ReliefGrid only shows places in its records. Try broadening your search:<div class="clarify-cats">${opts}</div></div>`);
   }
   return notes.join('');
 }
 function summaryHTML(results, q) {
   if (!results.length) return '';
-  const foot = `<div class="ai-foot">AI helps order these suggestions; every detail comes from ReliefGrid data. Availability is demo data — always call ahead to confirm.</div>`;
+  const foot = `<div class="ai-foot">Suggested with AI help; every detail comes from ReliefGrid’s records. Availability is demo data — confirm with the provider.</div>`;
   const available = results.filter(r => r.rec && r.rec.status === 'available').length;
-  const lead = `${results.length} ReliefGrid ${results.length === 1 ? 'listing matches' : 'listings match'}${q.userCoords ? ` near ${escapeHtml(q.locationLabel)}` : ''}${available ? ` · ${available} listed as available (demo data)` : ''}.`;
+  const lead = `${results.length} ${results.length === 1 ? 'place matches' : 'places match'}${q.userCoords ? ` near ${escapeHtml(q.locationLabel)}` : ''}${available ? ` · ${available} show availability (demo data)` : ''}.`;
   switch (session.summaryState) {
     case 'loading':
-      return `<div class="ai-summary is-loading" aria-busy="true"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Choosing good first calls…</div><p>${lead}</p><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>`;
+      return `<div class="ai-summary is-loading" aria-busy="true"><div class="ai-label">Picking good places to start…</div><p>${lead}</p><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>`;
     case 'done': {
       const picks = session.picks.map(p => {
         const f = findFacilityFeature(p.facilityId); if (!f) return '';
@@ -333,11 +328,11 @@ function summaryHTML(results, q) {
         const reasons = p.reasons.map(code => REASON_TEXT[code]?.(f, d, tr ? { ...tr, mode: q.travel?.mode } : null)).filter(Boolean).join(' · ');
         return `<li><button type="button" class="pick-btn" data-pick="${escapeHtml(p.facilityId)}"><span class="pick-name">${escapeHtml(f.properties.name)}</span><span class="pick-reason">${escapeHtml(reasons)}</span></button></li>`;
       }).join('');
-      return `<div class="ai-summary"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Suggested first calls</div>
+      return `<div class="ai-summary"><div class="ai-label">Good places to start</div>
         <p>${lead}</p>${picks ? `<ul class="pick-list">${picks}</ul>` : ''}${foot}</div>`;
     }
     case 'stale':
-      return `<div class="ai-summary is-stale"><div class="ai-label"><span class="ai-spark" aria-hidden="true"></span>Results changed</div><button type="button" class="btn btn-ghost btn-sm" id="ai-resummarize">Suggest first calls again</button></div>`;
+      return `<div class="ai-summary is-stale"><div class="ai-label">Results changed</div><button type="button" class="btn btn-ghost btn-sm" id="ai-resummarize">Suggest places again</button></div>`;
     case 'error':
       return `<div class="ai-summary is-error"><span>${escapeHtml(session.summaryError || 'Suggestions aren’t available right now.')} The listings below are unaffected.</span> <button type="button" class="link-btn" id="ai-resummarize">Try again</button></div>`;
     default:

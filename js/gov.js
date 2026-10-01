@@ -205,7 +205,7 @@ function renderOverviewTiles() {
   const m = overviewModel();
   const tiles = [
     { label: 'Total Resources', value: m.total, sub: 'in the ReliefGrid network' },
-    { label: 'Reporting Availability', value: m.withData, sub: 'resources sharing live capacity (demo)' },
+    { label: 'Reporting Availability', value: m.withData, sub: 'resources with demo availability data' },
     { label: 'Available Shelter Capacity', value: m.bedAvail, sub: `of ${m.bedTotal} tracked beds` },
     { label: 'High-Need Areas', value: m.highNeed, sub: `of ${m.tractTotal} tracts — top-quintile community need` },
     { label: 'High Need / Low Access', value: m.hh, sub: 'tracts in a statistically significant gap cluster' },
@@ -332,7 +332,7 @@ function renderDetailBody(feat) {
   const group = p.resource_group || 'other';
   const category = RESOURCE_LABELS[group] || labelize(group || p.type || 'Resource');
   const status = rec ? rec.status : 'unknown'; const s = STATUS[status];
-  const heroSub = rec ? availabilityHeadline(rec, group) : 'No live availability shared yet — contact the provider to confirm.';
+  const heroSub = rec ? availabilityHeadline(rec, group) : 'No availability shared yet — contact the provider to confirm.';
   const hero = `<div class="rd-status rd-status-${status}"><span class="rd-status-glyph" aria-hidden="true">${s.glyph}</span>
     <div class="rd-status-text"><div class="rd-status-label">${escapeHtml(s.label.toUpperCase())}</div><div class="rd-status-sub">${escapeHtml(heroSub)}</div></div></div>`;
   let keyInfo = '';
@@ -598,7 +598,7 @@ async function onProviderSubmit(e) {
   e.preventDefault();
   const id = $('gov-provider-resource-select').value;
   await Availability.applyProviderUpdate(id, readProviderForm());
-  showProviderToast('Availability updated. It is now live in Find Help and every ReliefGrid dashboard.');
+  showProviderToast('Availability updated. Find Help and the dashboards now show it (demo data, saved in this browser only).');
   refreshProviderPreview(); renderProviderLog();
 }
 async function onProviderRevertOne() {

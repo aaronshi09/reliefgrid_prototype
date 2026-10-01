@@ -69,6 +69,7 @@ export function initSeeker() {
   $('seeker-detail-close')?.addEventListener('click', () => window.__reliefgrid_navigate('seeker-results'));
   $('seeker-results-view-list')?.addEventListener('click', () => setResultsMobileView('list'));
   $('seeker-results-view-map')?.addEventListener('click', () => setResultsMobileView('map'));
+  $('seeker-new-search')?.addEventListener('click', () => { window.__reliefgrid_navigate('seeker-home'); setTimeout(() => $('navigator-input')?.focus(), 60); });
   Availability.subscribe(onSeekerAvailabilityChanged);
 }
 
@@ -83,6 +84,9 @@ export function navigateSeeker(page) {
 
   if (SEEKER_MAP_PAGES.has(page)) {
     $(`panel-${page}`)?.classList.remove('hidden');
+    // Phones always land on the list first; the map is one tap away.
+    previewId = null;
+    setResultsMobileView('list');
     AppState.map?.easeTo({ pitch: 0, duration: motion(300) });
     renderResults();
     setTimeout(() => AppState.map?.resize(), 50);
@@ -270,7 +274,8 @@ async function ensureTravelTimes() {
 function renderTravelBar() {
   const el = $('seeker-travel-bar'); if (!el) return;
   const loc = getAIStatus().location || {};
-  if (!state.userCoords) { el.hidden = true; el.innerHTML = ''; return; }
+  // Without routing on this deployment the bar has nothing to choose; cards already say "straight line".
+  if (!state.userCoords || !loc.travelTimes) { el.hidden = true; el.innerHTML = ''; return; }
   el.hidden = false;
   const t = state.travel;
   const btn = (mode, label) => `<button type="button" data-travel-mode="${mode}" aria-pressed="${t.mode === mode || (!t.mode && mode === 'none')}" class="${t.mode === mode || (!t.mode && mode === 'none') ? 'active' : ''}">${label}</button>`;
@@ -299,38 +304,58 @@ async function showRoute(facilityId) {
     const r = await fetchRoute(state.userCoords, t.mode, facilityId);
     setRouteLine(r.geometry, t.mode);
     setSelectedFacility(facilityId);
-    if (window.matchMedia('(max-width: 760px)').matches) setResultsMobileView('map');
     const xs = r.geometry.coordinates.map(c => c[0]), ys = r.geometry.coordinates.map(c => c[1]);
-    try { AppState.map.fitBounds([[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)]], { padding: fitPadding(), maxZoom: 15, duration: motion(600) }); } catch (_) {}
+    const frame = () => { try { AppState.map.fitBounds([[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)]], { padding: fitPadding(), maxZoom: 15, duration: motion(600) }); } catch (_) {} };
+    if (isNarrow()) { renderMapPreview(facilityId); setResultsMobileView('map', frame); } else frame();
     if (note) note.textContent = `Route shown: ${formatDuration(r.durationSec) || ''} ${MODE_WORD[t.mode]} · ${r.distanceM != null ? `${metersToMiles(r.distanceM).toFixed(1)} mi` : ''} (openrouteservice · © OpenStreetMap contributors)`;
   } catch (_) {
     if (note) note.textContent = 'The route couldn’t be loaded right now. Use “Get Directions” on the listing instead.';
   }
 }
+let lastResults = [];
 function renderResults() {
   const results = computeResults();
+  lastResults = results;
   const heading = $('seeker-results-heading');
-  if (heading) heading.textContent = `${results.length} ${results.length === 1 ? 'result' : 'results'} · ${state.resultsHeading}`;
+  if (heading) heading.textContent = `${results.length} ${results.length === 1 ? 'place' : 'places'} · ${state.resultsHeading}`;
   const sub = $('seeker-results-sub');
-  if (sub) sub.textContent = state.userCoords ? `Searching near ${state.locationLabel}` : 'Add your location to sort by distance';
+  if (sub) sub.innerHTML = state.userCoords
+    ? `Near <strong>${escapeHtml(state.locationLabel)}</strong> · closest first`
+    : `<button type="button" class="link-btn" id="seeker-results-add-location">Add your location</button> to see what’s closest`;
+  $('seeker-results-add-location')?.addEventListener('click', () => { window.__reliefgrid_navigate('seeker-home'); setTimeout(() => $('seeker-location-input')?.focus(), 60); });
   renderTravelBar();
   const listEl = $('seeker-results-list');
   if (listEl) {
     listEl.innerHTML = results.length
       ? results.map(r => resourceCardHTML(r.f, r.rec, r.d, r.t)).join('')
-      : `<div class="seeker-empty"><strong>No listings match all of these filters right now.</strong><span>Try removing a filter — or call the provider directly, availability changes often.</span><button type="button" class="btn btn-ghost btn-sm" id="seeker-clear-filters">Clear filters</button></div>`;
+      : `<div class="seeker-empty"><strong>Nothing matches all of these filters.</strong><span>Try removing a filter or choosing a different category.</span><button type="button" class="btn btn-ghost btn-sm" id="seeker-clear-filters">Clear filters</button></div>`;
     wireCardList(listEl, () => renderResults());
     $('seeker-clear-filters')?.addEventListener('click', () => { state.quickFilters.clear(); syncQuickFilterButtons(); renderResults(); });
   }
+  renderMapPreview(previewId);
   applyResultsMapFilter(results);
   resultsListeners.forEach(fn => { try { fn(results, getSeekerQuery()); } catch (e) { console.error(e); } });
   ensureTravelTimes();
 }
+const isNarrow = () => window.matchMedia('(max-width: 760px)').matches;
 // On the desktop results page a card click focuses its existing map marker
 // (details via the card's button); elsewhere — phones, Saved, similar
 // services — it opens the detail page as before.
 function cardSelectsMarker() {
-  return seekerPage === 'seeker-results' && !window.matchMedia('(max-width: 760px)').matches;
+  return seekerPage === 'seeker-results' && !isNarrow();
+}
+/* Phones, map view: the tapped marker's card is shown under the map so Call /
+ * Directions / Details are one tap away without switching back to the list. */
+let previewId = null;
+function renderMapPreview(id) {
+  const el = $('seeker-map-preview'); if (!el) return;
+  const r = id ? lastResults.find(x => x.f.properties.facility_id === id) : null;
+  previewId = r ? id : null;
+  document.getElementById('app').classList.toggle('has-map-preview', !!r);
+  if (!r) { el.hidden = true; el.innerHTML = ''; return; }
+  el.innerHTML = resourceCardHTML(r.f, r.rec, r.d, r.t);
+  el.hidden = false;
+  wireCardList(el, () => renderMapPreview(previewId));
 }
 function activateCard(id) {
   if (cardSelectsMarker()) selectResultCard(id, { fly: true });
@@ -343,16 +368,19 @@ function selectResultCard(id, { fly = false, scroll = false } = {}) {
   if (scroll && card) card.scrollIntoView({ block: 'nearest', behavior: motion(1) ? 'smooth' : 'auto' });
   if (fly) focusFacilityOnMap(id); else setSelectedFacility(id);
 }
-/** Marker clicks in Find Help: on the desktop results page select the matching
- *  card; everywhere else open the detail page (the original behaviour). */
+/** Marker clicks in Find Help: on the results page select the matching card
+ *  (desktop: highlight + scroll the list; phones: show it under the map);
+ *  everywhere else open the detail page (the original behaviour). */
 export function onSeekerMarkerClick(id) {
-  if (cardSelectsMarker() && document.querySelector(`#seeker-results-list .seeker-card[data-id="${CSS.escape(id)}"]`)) selectResultCard(id, { scroll: true });
+  const inResults = seekerPage === 'seeker-results' && document.querySelector(`#seeker-results-list .seeker-card[data-id="${CSS.escape(id)}"]`);
+  if (inResults && isNarrow()) { selectResultCard(id); renderMapPreview(id); }
+  else if (inResults) selectResultCard(id, { scroll: true });
   else openSeekerDetail(id);
 }
 function wireCardList(listEl, onSaveChange) {
   listEl.querySelectorAll('.seeker-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-save], [data-locate], [data-details], [data-route]')) return;
+      if (e.target.closest('a, [data-save], [data-locate], [data-details], [data-route]')) return;
       activateCard(card.dataset.id);
     });
     card.addEventListener('keydown', (e) => {
@@ -372,9 +400,15 @@ function wireCardList(listEl, onSaveChange) {
 export function focusFacilityOnMap(facilityId) {
   const feat = findFacilityFeature(facilityId); const map = AppState.map;
   if (!feat || !map) return;
-  if (window.matchMedia('(max-width: 760px)').matches && seekerPage === 'seeker-results') setResultsMobileView('map');
-  setSelectedFacility(facilityId);
-  flyToPoint(feat.geometry.coordinates, 13);
+  const go = () => { setSelectedFacility(facilityId); flyToPoint(feat.geometry.coordinates, 13); };
+  if (isNarrow() && seekerPage === 'seeker-results') {
+    selectResultCard(facilityId);
+    renderMapPreview(facilityId);
+    // Fly only once the map is visible and sized, so the re-frame of all
+    // results that follows the toggle doesn't undo it.
+    if (document.getElementById('app').dataset.mobileView !== 'map') { setResultsMobileView('map', go); return; }
+  }
+  go();
 }
 function applyResultsMapFilter(results) {
   const map = AppState.map; if (!map || !map.getLayer('facilities')) return;
@@ -407,12 +441,18 @@ function frameResults(duration) {
   if (lastResultBounds) { try { map.fitBounds(lastResultBounds, { padding: fitPadding(), maxZoom: 13, duration: motion(duration) }); } catch (_) {} }
   else fitLongIsland({ duration });
 }
-function setResultsMobileView(view) {
-  document.getElementById('app').dataset.mobileView = view;
+/** Phones: switch the results page between the list and the map. `afterShow`
+ *  replaces the default "frame every result" once the map is visible. */
+function setResultsMobileView(view, afterShow = null) {
+  const app = document.getElementById('app');
+  const was = app.dataset.mobileView || 'list';
+  app.dataset.mobileView = view;
   document.querySelectorAll('#seeker-results-view-toggle button').forEach(b => { b.classList.toggle('active', b.dataset.view === view); b.setAttribute('aria-pressed', String(b.dataset.view === view)); });
   // The map was hidden behind the list: resize, then re-frame the results.
   // Wait for the sheet's height transition so the padding reflects its final size.
-  if (view === 'map') setTimeout(() => { AppState.map?.resize(); frameResults(0); }, motion(340));
+  if (view === 'map') setTimeout(() => { AppState.map?.resize(); (afterShow || (() => frameResults(0)))(); }, motion(340));
+  // Back to the list: keep the place picked on the map in view.
+  else if (was === 'map' && previewId) selectResultCard(previewId, { scroll: true });
 }
 function resourceCardHTML(feat, rec, distKm, travel = null) {
   const p = feat.properties;
@@ -423,30 +463,54 @@ function resourceCardHTML(feat, rec, distKm, travel = null) {
   const travelHTML = travel && travel.durationSec != null
     ? `<span class="seeker-travel" title="Estimated ${tMode === 'walk' ? 'walking' : 'driving'} time by route (openrouteservice)">${formatDuration(travel.durationSec)} ${MODE_WORD[tMode]}${travel.distanceM != null ? ` · ${metersToMiles(travel.distanceM).toFixed(1)} mi route` : ''}</span>`
     : travel && travel.durationSec == null ? `<span class="seeker-travel is-none">No ${tMode === 'walk' ? 'walking' : 'driving'} route found</span>` : '';
-  const distHTML = distKm != null ? `<span class="seeker-dist" title="Straight-line distance, not a route">${kmToMiles(distKm).toFixed(1)} mi <small>straight-line</small></span>` : '';
+  const distHTML = distKm != null ? `<span class="seeker-dist" title="Straight-line distance, not a route">${kmToMiles(distKm).toFixed(1)} mi away <small>(straight line)</small></span>` : '';
   const routeBtn = tMode && state.userCoords && getAIStatus().location?.routeLines && travel?.durationSec != null
     ? `<button type="button" class="icon-btn" data-route="${escapeHtml(p.facility_id)}" aria-label="Show ${tMode === 'walk' ? 'walking' : 'driving'} route on the map" title="Show route on the map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 15.18V7c0-2.21-1.79-4-4-4s-4 1.79-4 4v10c0 1.1-.9 2-2 2s-2-.9-2-2V8.82C8.16 8.4 9 7.3 9 6c0-1.66-1.34-3-3-3S3 4.34 3 6c0 1.3.84 2.4 2 2.82V17c0 2.21 1.79 4 4 4s4-1.79 4-4V7c0-1.1.9-2 2-2s2 .9 2 2v8.18A2.996 2.996 0 0 0 18 21c1.66 0 3-1.34 3-3 0-1.3-.84-2.4-2-2.82z"/></svg></button>` : '';
   const id = escapeHtml(p.facility_id);
-  return `<article class="seeker-card" data-id="${id}" tabindex="0" aria-label="${escapeHtml(p.name || 'Unnamed resource')}">
+  const name = escapeHtml(p.name || 'Unnamed resource');
+  // Status only from the availability adapter (demo in this prototype) — labelled as such.
+  const open = rec && rec.raw.open_now != null ? openLabel(rec) : '';
+  const statusHTML = rec
+    ? `<div class="seeker-card-status">${statusChipHTML(status)}<span class="seeker-card-info">${escapeHtml(availabilityHeadline(rec, p.resource_group))}</span></div>
+       <div class="seeker-card-demo">${open ? `${escapeHtml(open)} · ` : ''}Demo status, updated ${escapeHtml(rec.relativeTime)}</div>`
+    : '';
+  return `<article class="seeker-card" data-id="${id}" tabindex="0" aria-label="${name}">
     <div class="seeker-card-top">
-      ${resourceLegendIcon(p.resource_group, null, 30)}
-      <div class="seeker-card-title"><h3>${escapeHtml(p.name || 'Unnamed resource')}</h3><div class="seeker-card-type">${escapeHtml(RESOURCE_LABELS[p.resource_group] || '')}</div></div>
+      ${resourceLegendIcon(p.resource_group, null, 32)}
+      <div class="seeker-card-title"><h3>${name}</h3><div class="seeker-card-type">${escapeHtml(RESOURCE_LABELS[p.resource_group] || '')}${distHTML ? `<br>${distHTML}` : ''}</div></div>
       <div class="seeker-card-tools">
         ${routeBtn}
-        <button type="button" class="icon-btn" data-locate="${id}" aria-label="Show on map" title="Show on map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.99 8.99 0 0 0 13 3.06V1h-2v2.06A8.99 8.99 0 0 0 3.06 11H1v2h2.06A8.99 8.99 0 0 0 11 20.94V23h2v-2.06A8.99 8.99 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg></button>
+        <button type="button" class="icon-btn" data-locate="${id}" aria-label="Show ${name} on the map" title="Show on map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.99 8.99 0 0 0 13 3.06V1h-2v2.06A8.99 8.99 0 0 0 3.06 11H1v2h2.06A8.99 8.99 0 0 0 11 20.94V23h2v-2.06A8.99 8.99 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg></button>
         <button type="button" class="icon-btn seeker-save-btn ${isSaved ? 'saved' : ''}" data-save="${id}" aria-pressed="${isSaved}" aria-label="${isSaved ? 'Remove from saved' : 'Save this resource'}">${isSaved ? '★' : '☆'}</button>
       </div>
     </div>
-    <div class="seeker-card-status">${statusChipHTML(status)}<span class="open-label">${escapeHtml(openLabel(rec))}</span>${distHTML}</div>
     ${travelHTML ? `<div class="seeker-card-travel">${travelHTML}</div>` : ''}
-    ${rec ? `<div class="seeker-card-info">${escapeHtml(availabilityHeadline(rec, p.resource_group))}</div>` : `<div class="seeker-card-info muted">Availability not shared yet</div>`}
-    <div class="seeker-card-meta">
-      <span>${escapeHtml(p.address || 'Address not listed')}</span>
-      <span>${rec ? `Updated ${escapeHtml(rec.relativeTime)} · demo` : ''}</span>
-    </div>
-    <button type="button" class="card-details-btn" data-details="${id}">View details <span aria-hidden="true">→</span></button>
+    ${statusHTML}
+    ${p.opening_time ? `<div class="seeker-card-line"><span class="seeker-card-line-k">Hours</span>${escapeHtml(p.opening_time)}</div>` : ''}
+    <div class="seeker-card-line"><span class="seeker-card-line-k">Address</span>${escapeHtml(p.address || 'Not listed')}</div>
+    <div class="seeker-card-actions">${cardActionsHTML(feat, name)}</div>
   </article>`;
 }
+/** Call (only with a listed phone number), Directions, Details. */
+function cardActionsHTML(feat, name) {
+  const p = feat.properties;
+  const tel = (p.phone || '').replace(/[^\d+]/g, '');
+  const call = tel ? `<a class="card-action is-primary" href="tel:${escapeHtml(tel)}" aria-label="Call ${name}">${ICON_PHONE}Call</a>` : '';
+  const dir = isConfidentialLocation(p)
+    ? `<span class="card-action is-note">Location confidential — contact for referral</span>`
+    : `<a class="card-action ${tel ? '' : 'is-primary'}" href="${escapeHtml(seekerDirectionsUrl(feat))}" target="_blank" rel="noopener" aria-label="Directions to ${name} (opens Google Maps)">${ICON_DIRECTIONS}Directions</a>`;
+  return `${call}${dir}<button type="button" class="card-action is-quiet" data-details="${escapeHtml(p.facility_id)}" aria-label="Details for ${name}">Details</button>`;
+}
+/** Shelters that keep their address private (e.g. youth / DV) get no directions link. */
+function isConfidentialLocation(p) { return /confidential/i.test(p.address || ''); }
+/** Google Maps directions, in the person's chosen travel mode when they picked one. */
+function seekerDirectionsUrl(feat) {
+  const url = directionsUrl(feat.geometry.coordinates, feat.properties.address);
+  const mode = state.travel.mode === 'walk' ? 'walking' : state.travel.mode === 'drive' ? 'driving' : '';
+  return mode && url !== '#' ? `${url}&travelmode=${mode}` : url;
+}
+const ICON_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>';
+const ICON_DIRECTIONS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.7 11.3l-9-9a1 1 0 0 0-1.4 0l-9 9a1 1 0 0 0 0 1.4l9 9a1 1 0 0 0 1.4 0l9-9a1 1 0 0 0 0-1.4zM14 14.5V12h-4v3H8v-4a1 1 0 0 1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>';
 
 /* ── Resource detail ──────────────────────────────────────────────────────── */
 export function openSeekerDetail(facilityId) {
@@ -469,7 +533,7 @@ function renderDetailPage() {
   const phone = p.phone || '';
 
   const whatItProvides = p.short_description || `${RESOURCE_LABELS[group] || 'A community resource'} serving Long Island.`;
-  const heroSub = rec ? availabilityHeadline(rec, group) : 'No live availability shared yet for this resource.';
+  const heroSub = rec ? availabilityHeadline(rec, group) : 'This listing doesn’t report availability yet. Contact the provider to confirm.';
 
   const distanceLine = distKm != null
     ? `${kmToMiles(distKm).toFixed(1)} miles away — a straight-line estimate, not driving directions.`
@@ -480,11 +544,16 @@ function renderDetailPage() {
 
   body.innerHTML = `
     <h2 class="sd-name">${escapeHtml(p.name || 'Unnamed resource')}</h2>
-    <div class="sd-type">${resourceLegendIcon(group)}<span>${escapeHtml(RESOURCE_LABELS[group] || '')}</span></div>
+    <div class="sd-type">${resourceLegendIcon(group)}<span>${escapeHtml(RESOURCE_LABELS[group] || '')}${distKm != null ? ` · ${kmToMiles(distKm).toFixed(1)} mi away (straight line)` : ''}</span></div>
+    <div class="sd-actions">
+      ${phone ? `<a class="btn btn-primary" href="tel:${escapeHtml(phone.replace(/[^\d+]/g, ''))}">${ICON_PHONE}Call</a>` : ''}
+      ${isConfidentialLocation(p) ? '' : `<a class="btn ${phone ? 'btn-secondary' : 'btn-primary'}" href="${escapeHtml(seekerDirectionsUrl(feat))}" target="_blank" rel="noopener">${ICON_DIRECTIONS}Get directions</a>`}
+      <button class="btn btn-ghost sd-save-btn" id="sd-save-btn" aria-pressed="${isSaved}">${isSaved ? '★ Saved' : '☆ Save'}</button>
+    </div>
     <p class="sd-provides">${escapeHtml(whatItProvides)}</p>
 
     <div class="rd-status rd-status-${status}"><span class="rd-status-glyph" aria-hidden="true">${s.glyph}</span>
-      <div class="rd-status-text"><div class="rd-status-label">${escapeHtml(s.label.toUpperCase())}</div><div class="rd-status-sub">${escapeHtml(heroSub)}</div></div></div>
+      <div class="rd-status-text"><div class="rd-status-label">${escapeHtml(s.label)}${rec ? ' <span class="rd-status-demo">· demo status</span>' : ''}</div><div class="rd-status-sub">${escapeHtml(heroSub)}</div></div></div>
     <div class="sd-openline">${escapeHtml(openLabel(rec))}${rec?.raw?.next_service_time ? ` · Next: ${escapeHtml(rec.raw.next_service_time)}` : ''}</div>
     ${rec?.raw?.message ? `<div class="rd-message"><span aria-hidden="true">📣</span> ${escapeHtml(rec.raw.message)}</div>` : ''}
     ${rec ? `<div class="sd-updated">Last updated ${escapeHtml(rec.relativeTime)} · ${demoPillHTML()}</div>${staleWarn}` : `<div class="sd-updated muted">${demoPillHTML('Prototype')} No availability shared for this resource yet.</div>`}
@@ -493,17 +562,12 @@ function renderDetailPage() {
     <div class="sd-section"><div class="rd-section-label">Eligibility</div><div class="muted">This prototype does not have confirmed eligibility rules for every resource. Contact the provider to confirm you qualify before travelling.</div></div>
     <div class="sd-section"><div class="rd-section-label">Address</div><div>${escapeHtml(p.address || 'Address not listed in this dataset')}</div>${p.coordinate_note ? `<div class="muted small">${escapeHtml(p.coordinate_note)}</div>` : ''}</div>
     ${p.opening_time ? `<div class="sd-section"><div class="rd-section-label">Listed hours</div><div>${escapeHtml(p.opening_time)}</div></div>` : ''}
-    <div class="sd-section"><div class="rd-section-label">Phone</div><div>${phone ? escapeHtml(phone) : 'Not listed — see website or visit in person.'}</div></div>
+    <div class="sd-section"><div class="rd-section-label">Phone</div><div>${phone ? escapeHtml(phone) : 'Not listed in ReliefGrid’s records yet.'}</div></div>
     ${website ? `<div class="sd-section"><div class="rd-section-label">Website</div><div><a href="${escapeHtml(website)}" target="_blank" rel="noopener">${escapeHtml(website)}</a></div></div>` : ''}
 
-    <div class="sd-actions">
-      ${phone ? `<a class="btn btn-primary" href="tel:${escapeHtml(phone.replace(/[^\d+]/g, ''))}">Call</a>` : `<button class="btn btn-primary" disabled title="No phone listed">Call</button>`}
-      <a class="btn btn-secondary" href="${escapeHtml(directionsUrl(coords, p.address))}" target="_blank" rel="noopener">Get Directions</a>
-      <button class="btn btn-ghost sd-save-btn" id="sd-save-btn" aria-pressed="${isSaved}">${isSaved ? '★ Saved' : '☆ Save'}</button>
-    </div>
     <div id="sd-location-context"></div>
 
-    <button type="button" class="btn btn-ghost btn-sm" id="sd-find-similar" style="margin-top:14px">Find Similar Services</button>
+    <button type="button" class="btn btn-ghost btn-sm" id="sd-find-similar" style="margin-top:14px">Find similar places</button>
     <div id="sd-similar" class="${(status === 'full' || status === 'closed') ? '' : 'hidden'}"></div>
   `;
   $('sd-save-btn')?.addEventListener('click', () => { toggleSaved(p.facility_id); renderDetailPage(); });
@@ -512,7 +576,7 @@ function renderDetailPage() {
   document.dispatchEvent(new CustomEvent('rg:seeker-detail-rendered', { detail: { facilityId: p.facility_id } }));
 }
 function similarNoticeHTML(status) {
-  const text = status === 'full' ? 'This resource shows no availability right now.' : 'This resource is currently closed.';
+  const text = status === 'full' ? 'This listing reports no availability (demo data).' : 'This listing reports it is closed (demo data).';
   return `<div class="insight-card" style="margin-top:10px">${escapeHtml(text)} Here are similar options nearby:</div>`;
 }
 function similarServicesHTML(feat) {
